@@ -235,6 +235,24 @@ const PARTS = {
         price: 1000
     },
 
+    'marshmallow.01': {
+        file: 'marshmallow.01.glb',
+        name: '마쉬멜로우.01',
+        price: 1000
+    },
+
+    'marshmallow.02': {
+        file: 'marshmallow.02.glb',
+        name: '마쉬멜로우.02',
+        price: 1000
+    },
+
+    macaron: {
+        file: 'macaron.glb',
+        name: '마카롱',
+        price: 1000
+    },
+
     wafle: {
         file: 'wafle.glb',
         name: '와플',
@@ -335,6 +353,12 @@ const ALL_PART_PRICES = {
     'sibwon.all': 4000,
 
     'lip.all': 3000,
+
+    'marshmallow.01.all': 3000,
+
+    'marshmallow.02.all': 3000,
+
+    'macaron.all': 3000,
 
     'yakgwa.all': 3000
 
