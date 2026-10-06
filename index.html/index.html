@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Clicker 3D Custom</title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #eeeeee;
+            color: #333;
+        }
+
+
+        .page {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+
+        /* =========================
+           3D VIEWER
+        ========================= */
+
+        .viewer {
+            flex: 1;
+            position: relative;
+            min-width: 0;
+        }
+
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+        }
+
+
+        /* =========================
+           RIGHT PANEL
+        ========================= */
+
+        .panel {
+            width: 380px;
+            height: 100%;
+            background: #ffffff;
+            overflow-y: auto;
+            padding: 24px;
+            border-left: 1px solid #dddddd;
+        }
+
+
+        .panel h1 {
+            margin: 0 0 24px;
+            font-size: 22px;
+        }
+
+
+        .section {
+            margin-bottom: 28px;
+        }
+
+
+        .section-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+
+        /* =========================
+           OPTION GRID
+        ========================= */
+
+        .option-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+
+        .option {
+            border: 1px solid #dddddd;
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+            background: #ffffff;
+            transition: 0.15s;
+        }
+
+
+        .option:hover {
+            border-color: #999999;
+        }
+
+
+        .option.active {
+            border: 2px solid #333333;
+        }
+
+
+        .option-image {
+            width: 100%;
+            height: 80px;
+            background: #f4f4f4;
+            border-radius: 8px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 13px;
+            color: #888888;
+            margin-bottom: 8px;
+        }
+
+
+        .option-name {
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+
+        .option-price {
+            font-size: 13px;
+            color: #777777;
+        }
+
+
+        /* =========================
+           SLOT
+        ========================= */
+
+        .slot-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+
+        .slot {
+            padding: 12px 5px;
+            border: 1px solid #dddddd;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+
+        .slot.active {
+            border: 2px solid #333333;
+            font-weight: bold;
+        }
+
+
+        /* =========================
+           COLOR
+        ========================= */
+
+        .color-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+
+        .color {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid #dddddd;
+            cursor: pointer;
+        }
+
+
+        .color.active {
+            outline: 2px solid #333333;
+            outline-offset: 2px;
+        }
+
+
+        /* =========================
+           PRICE
+        ========================= */
+
+        .price-box {
+            border-top: 1px solid #eeeeee;
+            padding-top: 18px;
+        }
+
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+
+        .price-total {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid #eeeeee;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+
+        .buy-button {
+            width: 100%;
+            margin-top: 18px;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: #222222;
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+
+        .buy-button:hover {
+            background: #000000;
+        }
+
+
+        /* =========================
+           SELECTED SLOT INFO
+        ========================= */
+
+        .selected-slot-info {
+            margin-top: 10px;
+            padding: 10px 12px;
+            background: #f7f7f7;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #666666;
+        }
+
+
+        /* =========================
+           모바일
+        ========================= */
+
+        @media (max-width: 900px) {
+
+            .page {
+                flex-direction: column;
+                height: auto;
+            }
+
+
+            .viewer {
+                height: 55vh;
+            }
+
+
+            .panel {
+                width: 100%;
+                height: auto;
+                border-top: 1px solid #ddd;
+                border-left: none;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="page">
+
+
+    <!-- =========================
+         3D VIEWER
+    ========================= -->
+
+    <div class="viewer">
+
+        <div id="canvas-container"></div>
+
+    </div>
+
+
+
+    <!-- =========================
+         OPTION PANEL
+    ========================= -->
+
+    <div class="panel">
+
+
+        <h1>
+            CLICKER CUSTOM 
+        </h1>
+
+
+
+        <!-- =========================
+             BASE
+        ========================= -->
+
+        <div class="section">
+
+            <div class="section-title">
+                케이스
+            </div>
+
+
+            <div class="option-grid">
+
+
+                <!-- 베이직 -->
+
+                <div
+                    class="option active"
+                    data-base="case.glb"
+                    data-price="15900"
+                    onclick="selectBase(this)"
+                >
+
+                    <div class="option-image">
+                        BASIC
+                    </div>
+
+
+                    <div class="option-name">
+                        베이직
+                    </div>
+
+
+                    <div class="option-price">
+                        15,900원
+                    </div>
+
+                </div>
+
+
+
+                <!-- 패턴 -->
+
+                <div
+                    class="option"
+                    data-base="pattern_case.glb"
+                    data-price="16900"
+                    onclick="selectBase(this)"
+                >
+
+                    <div class="option-image">
+                        PATTERN
+                    </div>
+
+
+                    <div class="option-name">
+                        패턴
+                    </div>
+
+
+                    <div class="option-price">
+                        16,900원
+                    </div>
+
+                </div>
+
+
+
+                <!-- 3구 케이스 -->
+
+                <div
+                    class="option"
+                    data-base="case_3botton.glb"
+                    data-price="11900"
+                    onclick="selectBase(this)"
+                >
+
+                    <div class="option-image">
+                        3 KEY
+                    </div>
+
+
+                    <div class="option-name">
+                        3구 케이스
+                    </div>
+
+
+                    <div class="option-price">
+                        11,900원
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =========================
+             TYPE
+        ========================= -->
+
+        <div class="section">
+
+            <div class="section-title">
+                키캡 타입
+            </div>
+
+
+            <div class="option-grid">
+
+
+                <div
+                    class="option active"
+                    data-type="A"
+                    onclick="selectType(this)"
+                >
+
+                    <div class="option-image">
+                        TYPE A
+                    </div>
+
+
+                    <div class="option-name">
+                        TYPE A
+                    </div>
+
+                </div>
+
+
+
+                <div
+                    class="option"
+                    data-type="B"
+                    onclick="selectType(this)"
+                >
+
+                    <div class="option-image">
+                        TYPE B
+                    </div>
+
+
+                    <div class="option-name">
+                        TYPE B
+                    </div>
+
+                </div>
+
+
+
+                <div
+                    class="option"
+                    data-type="C"
+                    onclick="selectType(this)"
+                >
+
+                    <div class="option-image">
+                        TYPE C
+                    </div>
+
+
+                    <div class="option-name">
+                        TYPE C
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =========================
+             KEY SLOT
+        ========================= -->
+
+        <div class="section">
+
+            <div class="section-title">
+                키캡
+            </div>
+
+
+            <div class="slot-grid">
+
+
+                <div
+                    class="slot active"
+                    onclick="selectSlot(0, this)"
+                >
+                    KEY 1
+                </div>
+
+
+                <div
+                    class="slot"
+                    onclick="selectSlot(1, this)"
+                >
+                    KEY 2
+                </div>
+
+
+                <div
+                    class="slot"
+                    onclick="selectSlot(2, this)"
+                >
+                    KEY 3
+                </div>
+
+
+                <div
+                    class="slot"
+                    onclick="selectSlot(3, this)"
+                >
+                    KEY 4
+                </div>
+
+
+                <div
+                    class="slot"
+                    onclick="selectSlot(4, this)"
+                >
+                    KEY 5
+                </div>
+
+
+                <div
+                    class="slot"
+                    onclick="selectSlot(5, this)"
+                >
+                    KEY 6
+                </div>
+
+
+            </div>
+
+
+            <div class="selected-slot-info">
+                선택된 위치 : KEY 1
+            </div>
+
+        </div>
+
+
+
+        <!-- =========================
+             BASE COLOR
+        ========================= -->
+
+        <div class="section">
+
+            <div class="section-title">
+                케이스 색상
+            </div>
+
+
+            <div class="color-grid">
+
+
+                <div
+                    class="color active"
+                    style="background:#303030"
+                    onclick="changeBaseColor('#303030', this)"
+                ></div>
+
+
+                <div
+                    class="color"
+                    style="background:#ffffff"
+                    onclick="changeBaseColor('#ffffff', this)"
+                ></div>
+
+
+                <div
+                    class="color"
+                    style="background:#41362c"
+                    onclick="changeBaseColor('#41362c', this)"
+                ></div>
+
+
+                <div
+                    class="color"
+                    style="background:#c01d11"
+                    onclick="changeBaseColor('#c01d11', this)"
+                ></div>
+
+
+                <div
+                    class="color"
+                    style="background:#ffcaca"
+                    onclick="changeBaseColor('#ffcaca', this)"
+                ></div>
+
+
+                <div
+                    class="color"
+                    style="background:#eecba4"
+                    onclick="changeBaseColor('#eecba4', this)"
+                ></div>
+
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =========================
+             KEYCAP COLOR
+        ========================= -->
+
+        <div class="section">
+
+            <div class="section-title">
+                키캡 색상
+            </div>
+
+
+            <div class="color-grid">
+
+
+                <div
+                    class="color active"
+                    data-keycap-color="#303030"
+                    style="background:#303030"
+                    onclick="changeKeycapColor('#303030', this)"
+                ></div>
+
+
+                <div
+                    class="color"
+                    data-keycap-color="#ffffff"
+                    style="background:#ffffff"
+                    onclick="changeKeycapColor('#ffffff', this)"
+                ></div>
+
+
+                <div
+                    class="color"
+                    data-keycap-color="#41362c"
+                    style="background:#41362c"
+                    onclick="changeKeycapColor('#41362c', this)"
+                ></div>
+
+
+                <div
+                    class="color"
+                    data-keycap-color="#c01d11"
+                    style="background:#c01d11"
+                    onclick="changeKeycapColor('#c01d11', this)"
+                ></div>
+
+
+                <div
+                    class="color"
+                    data-keycap-color="#ffcaca"
+                    style="background:#ffcaca"
+                    onclick="changeKeycapColor('#ffcaca', this)"
+                ></div>
+
+
+                <div
+                    class="color"
+                    data-keycap-color="#eecba4"
+                    style="background:#eecba4"
+                    onclick="changeKeycapColor('#eecba4', this)"
+                ></div>
+
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =========================
+             PARTS
+        ========================= -->
+
+        <div class="section">
+
+            <div class="section-title">
+                파츠
+            </div>
+
+
+            <div class="option-grid">
+
+
+                <!-- 없음 -->
+
+                <div
+                    class="option active"
+                    onclick="selectPart('none')"
+                >
+
+                    <div class="option-image">
+                        NONE
+                    </div>
+
+
+                    <div class="option-name">
+                        없음
+                    </div>
+
+
+                    <div class="option-price">
+                        -
+                    </div>
+
+                </div>
+
+
+
+                <!-- 닭 -->
+
+                <div
+                    class="option"
+                    data-part="chicken"
+                    onclick="selectPart('chicken')"
+                >
+
+                    <div class="option-image">
+                        CHICKEN
+                    </div>
+
+
+                    <div class="option-name">
+                        닭
+                    </div>
+
+
+                    <div class="option-price">
+                        +1,500원
+                    </div>
+
+                </div>
+
+
+
+                <!-- 병아리 -->
+
+                <div
+                    class="option"
+                    data-part="chick"
+                    onclick="selectPart('chick')"
+                >
+
+                    <div class="option-image">
+                        CHICK
+                    </div>
+
+
+                    <div class="option-name">
+                        병아리
+                    </div>
+
+
+                    <div class="option-price">
+                        +1,500원
+                    </div>
+
+                </div>
+
+
+
+                <!-- 달걀 -->
+
+                <div
+                    class="option"
+                    data-part="egg"
+                    onclick="selectPart('egg')"
+                >
+
+                    <div class="option-image">
+                        EGG
+                    </div>
+
+
+                    <div class="option-name">
+                        달걀
+                    </div>
+
+
+                    <div class="option-price">
+                        +1,000원
+                    </div>
+
+                </div>
+
+            
+                <!-- 타코야키 -->
+
+                <div
+                    class="option"
+                    data-part="takoyaki"
+                    onclick="selectPart('takoyaki')"
+                >
+
+                    <div class="option-image">
+                        TAKOYAKI
+                    </div>
+
+
+                    <div class="option-name">
+                        타코야키
+                    </div>
+
+
+                    <div class="option-price">
+                        +1,000원
+                    </div>
+
+                </div>
+
+
+
+                <!-- 약과 -->
+
+                <div
+                    class="option"
+                    data-part="yakgwa"
+                    onclick="selectPart('yakgwa')"
+                >
+
+                    <div class="option-image">
+                        YAKGWA
+                    </div>
+
+
+                    <div class="option-name">
+                        약과
+                    </div>
+
+
+                    <div class="option-price">
+                        +800원
+                    </div>
+
+                </div>
+
+
+
+                <!-- 와플 -->
+
+                <div
+                    class="option"
+                    data-part="wafle"
+                    onclick="selectPart('wafle')"
+                >
+
+                    <div class="option-image">
+                        WAFLE
+                    </div>
+
+
+                    <div class="option-name">
+                        와플
+                    </div>
+
+
+                    <div class="option-price">
+                        +1,000원
+                    </div>
+
+                </div>
+
+
+
+                <!-- 국화 -->
+
+                <div
+                    class="option"
+                    data-part="gukhwa"
+                    onclick="selectPart('gukhwa')"
+                >
+
+                    <div class="option-image">
+                        GUKHWA
+                    </div>
+
+
+                    <div class="option-name">
+                        국화
+                    </div>
+
+
+                    <div class="option-price">
+                        +1,000원
+                    </div>
+
+                </div>
+
+
+
+                <!-- 십원 -->
+
+                <div
+                    class="option"
+                    data-part="sibwon"
+                    onclick="selectPart('sibwon')"
+                >
+
+                    <div class="option-image">
+                        SIBWON
+                    </div>
+
+
+                    <div class="option-name">
+                        십원
+                    </div>
+
+
+                    <div class="option-price">
+                        +1,000원
+                    </div>
+
+                </div>
+
+
+
+                <!-- 피넛 -->
+
+                <div
+                    class="option"
+                    data-part="peanut"
+                    onclick="selectPart('peanut')"
+                >
+
+                    <div class="option-image">
+                        PEANUT
+                    </div>
+
+
+                    <div class="option-name">
+                        피넛
+                    </div>
+
+
+                    <div class="option-price">
+                        +1,000원
+                    </div>
+
+                </div>
+
+
+
+                <!-- 호두 -->
+
+                <div
+                    class="option"
+                    data-part="hodu"
+                    onclick="selectPart('hodu')"
+                >
+
+                    <div class="option-image">
+                        HODU
+                    </div>
+
+
+                    <div class="option-name">
+                        호두
+                    </div>
+
+
+                    <div class="option-price">
+                        +1,000원
+                    </div>
+
+                </div>
+
+                <!-- 복숭아 -->
+
+                <div
+                    class="option"
+                    data-part="peach"
+                    onclick="selectPart('peach')"
+                >
+
+                    <div class="option-image">
+                        PEACH
+                    </div>
+
+
+                    <div class="option-name">
+                        복숭아
+                    </div>
+
+
+                    <div class="option-price">
+                        +500원
+                    </div>
+
+                </div>
+
+                <!-- 사과 -->
+
+                <div
+                    class="option"
+                    data-part="apple"
+                    onclick="selectPart('apple')"
+                >
+
+                    <div class="option-image">
+                        APPLE
+                    </div>
+
+
+                    <div class="option-name">
+                        사과
+                    </div>
+
+
+                    <div class="option-price">
+                        +500원
+                    </div>
+
+                </div>
+
+
+                 <!-- 입술 -->
+
+                <div
+                    class="option"
+                    data-part="lip"
+                    onclick="selectPart('lip')"
+                >
+
+                    <div class="option-image">
+                        LIP
+                    </div>
+
+
+                    <div class="option-name">
+                        입술
+                    </div>
+
+
+                    <div class="option-price">
+                        +1,000원
+                    </div>
+
+                </div>
+
+
+                <!-- 입술전체 -->
+
+                <div
+                    class="option"
+                    data-part="lip.all"
+                    onclick="selectPart('lip.all')"
+                >
+
+                    <div class="option-image">
+                        LIPALL
+                    </div>
+
+
+                    <div class="option-name">
+                        입술전체
+                    </div>
+
+
+                    <div class="option-price">
+                        +3,000원
+                    </div>
+
+                </div>
+
+                <!-- 약과전체 -->
+
+                <div
+                    class="option"
+                    data-part="yakgwa.all"
+                    onclick="selectPart('yakgwa.all')"
+                >
+
+                    <div class="option-image">
+                        YAKGWAALL
+                    </div>
+
+
+                    <div class="option-name">
+                        약과전체
+                    </div>
+
+
+                    <div class="option-price">
+                        +3000원
+                    </div>
+
+                </div>
+
+                <!-- 달걀전체 -->
+
+                <div
+                    class="option"
+                    data-part="egg.all"
+                    onclick="selectPart('egg.all')"
+                >
+
+                    <div class="option-image">
+                        EGGALL
+                    </div>
+
+
+                    <div class="option-name">
+                        달걀전체
+                    </div>
+
+
+                    <div class="option-price">
+                        +4,000원
+                    </div>
+
+                </div>
+
+                <!-- 타코야키전체 -->
+
+                <div
+                    class="option"
+                    data-part="takoyaki.all"
+                    onclick="selectPart('takoyaki.all')"
+                >
+
+                    <div class="option-image">
+                        TAKOYAKIALL
+                    </div>
+
+
+                    <div class="option-name">
+                        타코야키전체
+                    </div>
+
+
+                    <div class="option-price">
+                        +4,000원
+                    </div>
+
+                </div>
+
+                
+                <!-- 와플전체 -->
+
+                <div
+                    class="option"
+                    data-part="wafle.all"
+                    onclick="selectPart('wafle.all')"
+                >
+
+                    <div class="option-image">
+                        WAFLEALL
+                    </div>
+
+
+                    <div class="option-name">
+                        와플전체
+                    </div>
+
+
+                    <div class="option-price">
+                        +4,000원
+                    </div>
+
+                </div>
+
+                <!-- 피넛전체 -->
+
+                <div
+                    class="option"
+                    data-part="peanut.all"
+                    onclick="selectPart('peanut.all')"
+                >
+
+                    <div class="option-image">
+                        PEANUTALL
+                    </div>
+
+
+                    <div class="option-name">
+                        피넛전체
+                    </div>
+
+
+                    <div class="option-price">
+                        +4,000원
+                    </div>
+
+                </div>
+
+                <!-- 호두전체 -->
+
+                <div
+                    class="option"
+                    data-part="hodu.all"
+                    onclick="selectPart('hodu.all')"
+                >
+
+                    <div class="option-image">
+                        HODUALL
+                    </div>
+
+
+                    <div class="option-name">
+                        호두전체
+                    </div>
+
+
+                    <div class="option-price">
+                        +4,000원
+                    </div>
+
+                </div>
+
+                <!-- 국화전체 -->
+
+                <div
+                    class="option"
+                    data-part="gukhwa.all"
+                    onclick="selectPart('gukhwa.all')"
+                >
+
+                    <div class="option-image">
+                        GUKHWAALL
+                    </div>
+
+
+                    <div class="option-name">
+                        국화전체
+                    </div>
+
+
+                    <div class="option-price">
+                        +4,000원
+                    </div>
+
+                </div>
+
+                <!-- 십원전체 -->
+
+                <div
+                    class="option"
+                    data-part="sibwon.all"
+                    onclick="selectPart('sibwon.all')"
+                >
+
+                    <div class="option-image">
+                        SIBWONALL
+                    </div>
+
+
+                    <div class="option-name">
+                        십원전체
+                    </div>
+
+
+                    <div class="option-price">
+                        +4,000원
+                    </div>
+
+                </div>
+
+                <!-- 복숭아전체 -->
+
+                <div
+                    class="option"
+                    data-part="peach.all"
+                    onclick="selectPart('peach.all')"
+                >
+
+                    <div class="option-image">
+                        PEACHALL
+                    </div>
+
+
+                    <div class="option-name">
+                        복숭아전체
+                    </div>
+
+
+                    <div class="option-price">
+                        +1,000원
+                    </div>
+
+                </div>
+
+                <!-- 사과전체 -->
+
+                <div
+                    class="option"
+                    data-part="apple.all"
+                    onclick="selectPart('apple.all')"
+                >
+
+                    <div class="option-image">
+                        APPLEALL
+                    </div>
+
+
+                    <div class="option-name">
+                        사과전체
+                    </div>
+
+
+                    <div class="option-price">
+                        +1,000원
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =========================
+             PRICE
+        ========================= -->
+
+        <div class="section price-box">
+
+
+            <div class="price-row">
+
+                <span>
+                    베이스
+                </span>
+
+                <span id="basePrice">
+                    15,900원
+                </span>
+
+            </div>
+
+
+            <div class="price-row">
+
+                <span>
+                    파츠
+                </span>
+
+                <span id="partPrice">
+                    0원
+                </span>
+
+            </div>
+
+
+            <div class="price-total">
+
+                <span>
+                    총 금액
+                </span>
+
+                <span id="totalPrice">
+                    15,900원
+                </span>
+
+            </div>
+
+
+            <button
+                class="buy-button"
+                onclick="buyProduct()"
+            >
+                구매하기
+            </button>
+
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================
+     THREE.JS
+========================= -->
+
+<script type="importmap">
+
+{
+    "imports": {
+
+        "three":
+            "https://unpkg.com/three@0.180.0/build/three.module.js",
+
+        "three/addons/":
+            "https://unpkg.com/three@0.180.0/examples/jsm/"
+
+    }
+}
+
+</script>
+
+
+<script
+    type="module"
+    src="./app.js"
+></script>
+
+
+</body>
+
+</html>
