@@ -1961,6 +1961,31 @@ async function(
 
     }
 
+    // ========================================================
+    // ALL NONE
+    // 전체 KEY의 파츠 제거
+    // ========================================================
+
+    if (
+    partName === 'all-none'
+    ) {
+
+    removeAllParts();
+
+
+    updateThreeKeyCaseVisibility();
+
+
+    updatePrice();
+
+
+    fitCameraToProduct();
+
+
+    return;
+
+    }
+
 
     // ========================================================
     // 파츠 등록 여부 확인
