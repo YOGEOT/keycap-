@@ -234,6 +234,12 @@ const PARTS = {
         price: 1000
     },
 
+    pepero: {
+        file: 'pepero.glb',
+        name: '빼빼로',
+        price: 500
+    },
+
     wafle: {
         file: 'wafle.glb',
         name: '와플',
@@ -406,19 +412,64 @@ let selectedSlot =
 
 
 let selectedBaseColor =
-    '#ff8bd1';
+    '#cccccc';
 
 
 let selectedKeycapColors = [
 
-    '#ff8bd1',
-    '#ff8bd1',
-    '#ff8bd1',
-    '#ff8bd1',
-    '#ff8bd1',
-    '#ff8bd1'
+    '#cccccc',
+    '#cccccc',
+    '#cccccc',
+    '#cccccc',
+    '#cccccc',
+    '#cccccc'
 
 ];
+
+window.selectAllKeycapColor = function(color, element) {
+
+    // 전체 키캡 색상 변경
+    for (let i = 0; i < 6; i++) {
+
+        // 현재 선택된 색상값 저장
+        selectedKeycapColors[i] = color;
+
+    }
+
+    // 현재 로드된 키캡에 색상 적용
+    for (let i = 0; i < 6; i++) {
+
+        const cap = capModels[i];
+
+        if (!cap)
+            continue;
+
+        cap.traverse((child) => {
+
+            if (!child.isMesh)
+                return;
+
+            if (!child.material)
+                return;
+
+            child.material.color.set(color);
+
+        });
+
+    }
+
+    // 전체 색상 버튼 활성화
+    document
+        .querySelectorAll('.color')
+        .forEach(item => {
+            item.classList.remove('active');
+        });
+
+    if (element) {
+        element.classList.add('active');
+    }
+
+};
 
 
 const BASE_PRICE =
