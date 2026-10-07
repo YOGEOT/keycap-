@@ -192,6 +192,12 @@ const PARTS = {
         price: 1500
     },
 
+    chickenegg: {
+        file: 'chicken egg.glb',
+        name: '닭알',
+        price: 500
+    },
+
     chick: {
         file: 'chick.glb',
         name: '병아리',
@@ -243,7 +249,13 @@ const PARTS = {
     pretzel: {
         file: 'pretzel.glb',
         name: '프레첼',
-        price: 800
+        price: 1000
+    },
+
+    cookie: {
+        file: 'cookie.glb',
+        name: '쿠키',
+        price: 1000
     },
 
     wafle: {
@@ -324,6 +336,8 @@ const BASE_OPTIONS = {
 
 const ALL_PART_PRICES = {
 
+    'chickenegg.all': 1000,
+
     'peach.all': 1000,
 
     'apple.all': 1000,
@@ -350,7 +364,9 @@ const ALL_PART_PRICES = {
 
     'macaron.all': 3000,
 
-    'pretzel.all': 3000,
+    'pretzel.all': 4000,
+
+    'cookie.all': 4000,
 
     'yakgwa.all': 3000
 
