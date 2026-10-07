@@ -354,9 +354,9 @@ const ALL_PART_PRICES = {
 
     'lip.all': 3000,
 
-    'marshmallow.01.all': 3000,
+    'marshmallow.01.all': 4000,
 
-    'marshmallow.02.all': 3000,
+    'marshmallow.02.all': 4000,
 
     'macaron.all': 3000,
 
