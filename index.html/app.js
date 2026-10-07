@@ -2177,15 +2177,14 @@ function updatePrice() {
     }
 
 
-    if (switchPriceElement) {
+   if (switchPriceElement) {
 
-        switchPriceElement.textContent =
-            switchPrice.toLocaleString(
-                'ko-KR'
-            ) +
-            '원';
+    switchPriceElement.textContent =
+        switchOption
+            ? switchOption.name
+            : '-';
 
-    }
+}
 
 
     if (partPriceElement) {
