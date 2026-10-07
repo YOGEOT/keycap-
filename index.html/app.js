@@ -7,37 +7,28 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 // 기본 설정
 // ============================================================
 
-const container =
-    document.getElementById(
-        'canvas-container'
-    );
+const container = document.getElementById('canvas-container');
 
 
 // ============================================================
 // Scene
 // ============================================================
 
-const scene =
-    new THREE.Scene();
+const scene = new THREE.Scene();
 
-scene.background =
-    new THREE.Color(
-        0xf4f4f4
-    );
+scene.background = new THREE.Color(0xf4f4f4);
 
 
 // ============================================================
 // Camera
 // ============================================================
 
-const camera =
-    new THREE.PerspectiveCamera(
-        35,
-        container.clientWidth /
-        container.clientHeight,
-        0.01,
-        10000
-    );
+const camera = new THREE.PerspectiveCamera(
+    35,
+    container.clientWidth / container.clientHeight,
+    0.01,
+    10000
+);
 
 camera.position.set(
     0,
@@ -50,16 +41,12 @@ camera.position.set(
 // Renderer
 // ============================================================
 
-const renderer =
-    new THREE.WebGLRenderer({
-        antialias: true
-    });
+const renderer = new THREE.WebGLRenderer({
+    antialias: true
+});
 
 renderer.setPixelRatio(
-    Math.min(
-        window.devicePixelRatio,
-        2
-    )
+    Math.min(window.devicePixelRatio, 2)
 );
 
 renderer.setSize(
@@ -118,17 +105,11 @@ const controls =
         renderer.domElement
     );
 
-controls.enableDamping =
-    true;
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
 
-controls.dampingFactor =
-    0.08;
-
-controls.minDistance =
-    0.1;
-
-controls.maxDistance =
-    10000;
+controls.minDistance = 0.1;
+controls.maxDistance = 10000;
 
 controls.target.set(
     0,
@@ -217,7 +198,7 @@ const PARTS = {
         price: 1500
     },
 
-     lip: {
+    lip: {
         file: 'lip.glb',
         name: '입술',
         price: 1000
@@ -257,79 +238,76 @@ const PARTS = {
         file: 'wafle.glb',
         name: '와플',
         price: 1000
-
     }
 
 };
 
 
 // ============================================================
-// ⭐ 케이스별 추가금액
-//
-// 여기에서 케이스별 추가금액을 직접 수정할 수 있습니다.
-//
-// case.glb
-// → 기본 베이스
-//
-// pattern_case.glb
-// → 패턴 베이스
-//
-// 3case.glb
-// → 3구 케이스
+// 축 / 스위치 옵션
+// ============================================================
+
+const SWITCH_OPTIONS = {
+
+    blue: {
+        file: 'blue.glb',
+        name: '청축',
+        price: 0
+    },
+
+    brown: {
+        file: 'brown.glb',
+        name: '갈축',
+        price: 0
+    },
+
+    gangbaek: {
+        file: 'gangbaek.glb',
+        name: '강백축',
+        price: 0
+    },
+
+    seasalt: {
+        file: 'seasalt.glb',
+        name: '바다소금축',
+        price: 0
+    },
+
+    strawberry_latte: {
+        file: 'strawberry_latte.glb',
+        name: '딸기라떼축',
+        price: 0
+    }
+
+};
+
+
+// ============================================================
+// 케이스 옵션
 // ============================================================
 
 const BASE_OPTIONS = {
 
     'case.glb': {
-
         name: '기본 베이스',
-
         price: 0
-
     },
-
 
     'pattern_case.glb': {
-
         name: '패턴 베이스',
-
         price: 1000
-
     },
 
-
     'case_3botton.glb': {
-
         name: '3구 케이스',
-
         price: -4000
-
     }
 
 };
 
 
 // ============================================================
-// ⭐ .all 파츠별 추가금액
-//
-// 각 .all 파츠의 "전체 배치 가격"을
-// 여기에서 직접 수정할 수 있습니다.
-//
-// 예:
-//
-// egg.all
-// → KEY 1~6 전체 배치
-// → +5,000원
-//
-// takoyaki.all
-// → KEY 1~6 전체 배치
-// → +6,000원
-//
-// yakgwa.all
-// → KEY 1~6 전체 배치
-// → +4,000원
-//
-// ※ 기존 egg / takoyaki / yakgwa 가격과 별개입니다.
+// 전체 파츠 가격
 // ============================================================
 
 const ALL_PART_PRICES = {
@@ -337,7 +315,7 @@ const ALL_PART_PRICES = {
     'peach.all': 1000,
 
     'apple.all': 1000,
-    
+
     'egg.all': 4000,
 
     'takoyaki.all': 4000,
@@ -366,7 +344,7 @@ const ALL_PART_PRICES = {
 
 
 // ============================================================
-// 현재 상태
+// 상태
 // ============================================================
 
 let baseModel = null;
@@ -405,6 +383,20 @@ let selectedParts = [
 ];
 
 
+let switchModels = [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+];
+
+
+let selectedSwitch =
+    'blue';
+
+
 let selectedType =
     'A';
 
@@ -429,20 +421,13 @@ let selectedKeycapColors = [
 ];
 
 
-// ============================================================
-// 가격
-// ============================================================
-
 const BASE_PRICE =
     15900;
 
 
-// ============================================================
-// 재질
-// ============================================================
-
 const COMMON_ROUGHNESS =
     0.65;
+
 
 const COMMON_METALNESS =
     0.0;
@@ -460,26 +445,11 @@ function loadGLB(path) {
             const cacheBuster =
                 `?v=${Date.now()}`;
 
-            const freshPath =
-                `${path}${cacheBuster}`;
-
-
-            console.log(
-                'GLB 로드:',
-                freshPath
-            );
-
-
             loader.load(
 
-                freshPath,
+                `${path}${cacheBuster}`,
 
                 gltf => {
-
-                    console.log(
-                        'GLB 로드 완료:',
-                        path
-                    );
 
                     resolve(
                         gltf.scene
@@ -512,7 +482,7 @@ function loadGLB(path) {
 
 
 // ============================================================
-// Material 적용
+// 재질 적용
 // ============================================================
 
 function applyCommonMaterial(
@@ -635,7 +605,7 @@ function applyCommonMaterial(
 
 
 // ============================================================
-// 실제 모델의 월드 Bounding Box 중심
+// 모델 월드 중심
 // ============================================================
 
 function getModelWorldCenter(
@@ -670,7 +640,7 @@ function getModelWorldCenter(
 
 
 // ============================================================
-// Camera 자동 맞춤
+// Camera 맞춤
 // ============================================================
 
 function fitCameraToProduct() {
@@ -739,8 +709,7 @@ function fitCameraToProduct() {
         );
 
 
-    distance *=
-        1.35;
+    distance *= 1.35;
 
 
     camera.position.set(
@@ -782,6 +751,7 @@ function fitCameraToProduct() {
     controls.minDistance =
         distance * 0.25;
 
+
     controls.maxDistance =
         distance * 5;
 
@@ -792,7 +762,7 @@ function fitCameraToProduct() {
 
 
 // ============================================================
-// 3구 케이스 확인
+// 3구 케이스
 // ============================================================
 
 function isThreeKeyCase() {
@@ -806,16 +776,7 @@ function isThreeKeyCase() {
 
 
 // ============================================================
-// 3구 케이스 표시 처리
-//
-// 3구:
-//
-// KEY 1 → 표시
-// KEY 2 → 숨김
-// KEY 3 → 표시
-// KEY 4 → 숨김
-// KEY 5 → 표시
-// KEY 6 → 숨김
+// 3구 케이스 가시성
 // ============================================================
 
 function updateThreeKeyCaseVisibility() {
@@ -824,77 +785,41 @@ function updateThreeKeyCaseVisibility() {
         isThreeKeyCase();
 
 
-    if (capModels[0]) {
+    for (
+        let i = 0;
+        i < 6;
+        i++
+    ) {
 
-        capModels[0].visible =
-            true;
-
-    }
-
-
-    if (capModels[1]) {
-
-        capModels[1].visible =
-            !threeKey;
-
-    }
+        const visible =
+            !threeKey ||
+            i === 0 ||
+            i === 2 ||
+            i === 4;
 
 
-    if (capModels[2]) {
+        if (capModels[i]) {
 
-        capModels[2].visible =
-            true;
+            capModels[i].visible =
+                visible;
 
-    }
-
-
-    if (capModels[3]) {
-
-        capModels[3].visible =
-            !threeKey;
-
-    }
+        }
 
 
-    if (capModels[4]) {
+        if (partModels[i]) {
 
-        capModels[4].visible =
-            true;
+            partModels[i].visible =
+                visible;
 
-    }
-
-
-    if (capModels[5]) {
-
-        capModels[5].visible =
-            !threeKey;
-
-    }
+        }
 
 
-    // KEY 2
-    if (partModels[1]) {
+        if (switchModels[i]) {
 
-        partModels[1].visible =
-            !threeKey;
+            switchModels[i].visible =
+                visible;
 
-    }
-
-
-    // KEY 4
-    if (partModels[3]) {
-
-        partModels[3].visible =
-            !threeKey;
-
-    }
-
-
-    // KEY 6
-    if (partModels[5]) {
-
-        partModels[5].visible =
-            !threeKey;
+        }
 
     }
 
@@ -915,19 +840,12 @@ async function loadBase(
             baseModel
         );
 
-        baseModel =
-            null;
+        baseModel = null;
 
     }
 
 
     try {
-
-        console.log(
-            'Base 로드 시작:',
-            fileName
-        );
-
 
         baseModel =
             await loadGLB(
@@ -948,19 +866,12 @@ async function loadBase(
 
         fitCameraToProduct();
 
-
-        console.log(
-            'Base 로드 완료:',
-            fileName
-        );
-
     }
 
     catch (error) {
 
         console.error(
             'Base 로드 실패:',
-            fileName,
             error
         );
 
@@ -998,22 +909,14 @@ function(element) {
         element.dataset.base;
 
 
-    console.log(
-        '선택한 Base:',
-        selectedBase
-    );
-
-
     loadBase(
         selectedBase
     );
 
 
-    // ⭐ 케이스 변경 후 가격 갱신
     updatePrice();
 
 };
-
 
 
 // ============================================================
@@ -1023,11 +926,6 @@ function(element) {
 async function loadCaps(
     type
 ) {
-
-    console.log(
-        `TYPE ${type} 로드 시작`
-    );
-
 
     for (
         let i = 0;
@@ -1041,8 +939,7 @@ async function loadCaps(
                 capModels[i]
             );
 
-            capModels[i] =
-                null;
+            capModels[i] = null;
 
         }
 
@@ -1057,18 +954,8 @@ async function loadCaps(
             i++
         ) {
 
-            const capNumber =
-                i + 1;
-
-
             const path =
-                `./Type${type}_cap${capNumber}.glb`;
-
-
-            console.log(
-                '키캡 로드:',
-                path
-            );
+                `./Type${type}_cap${i + 1}.glb`;
 
 
             const model =
@@ -1097,12 +984,10 @@ async function loadCaps(
         updateThreeKeyCaseVisibility();
 
 
+        await reloadSelectedSwitch();
+
+
         fitCameraToProduct();
-
-
-        console.log(
-            `TYPE ${type} 로드 완료`
-        );
 
     }
 
@@ -1147,12 +1032,6 @@ function(element) {
         element.dataset.type;
 
 
-    console.log(
-        '선택한 TYPE:',
-        selectedType
-    );
-
-
     loadCaps(
         selectedType
     );
@@ -1179,7 +1058,7 @@ function applyBaseColor() {
 
 
 // ============================================================
-// KEYCAP 색상
+// Keycap 색상
 // ============================================================
 
 function applyKeycapColorToModel(
@@ -1200,7 +1079,7 @@ function applyKeycapColorToModel(
 
 
 // ============================================================
-// KEY 선택
+// Slot 선택
 // ============================================================
 
 window.selectSlot =
@@ -1231,16 +1110,9 @@ function(
         slot;
 
 
-    console.log(
-        '선택 슬롯:',
-        selectedSlot + 1
-    );
-
-
     updateCurrentColorUI();
 
 
-    // 선택된 KEY 표시
     const selectedSlotInfo =
         document.querySelector(
             '.selected-slot-info'
@@ -1260,7 +1132,7 @@ function(
 
 
 // ============================================================
-// 현재 KEY 색상 UI
+// 현재 색상 UI
 // ============================================================
 
 function updateCurrentColorUI() {
@@ -1277,12 +1149,8 @@ function updateCurrentColorUI() {
         )
         .forEach(button => {
 
-            const buttonColor =
-                button.dataset.keycapColor;
-
-
             if (
-                buttonColor ===
+                button.dataset.keycapColor ===
                 currentColor
             ) {
 
@@ -1306,7 +1174,7 @@ function updateCurrentColorUI() {
 
 
 // ============================================================
-// KEYCAP 색상 변경
+// Keycap 색상 변경
 // ============================================================
 
 window.changeKeycapColor =
@@ -1318,14 +1186,6 @@ function(
     selectedKeycapColors[
         selectedSlot
     ] = color;
-
-
-    console.log(
-        `KEY ${
-            selectedSlot + 1
-        } 색상 변경:`,
-        color
-    );
 
 
     if (
@@ -1421,7 +1281,6 @@ function removePartFromSlot(
             partModels[slot]
         );
 
-
         partModels[slot] =
             null;
 
@@ -1449,7 +1308,7 @@ function removePartFromSlot(
 
 
 // ============================================================
-// 전체 KEY 파츠 제거
+// 모든 파츠 제거
 // ============================================================
 
 function removeAllParts() {
@@ -1470,7 +1329,7 @@ function removeAllParts() {
 
 
 // ============================================================
-// 파츠를 선택 KEY에 배치
+// 파츠 이동
 // ============================================================
 
 function movePartToSlot(
@@ -1478,39 +1337,14 @@ function movePartToSlot(
     slot
 ) {
 
-    if (!partModel) {
-
-        console.warn(
-            '이동할 파츠가 없습니다.'
-        );
-
+    if (!partModel)
         return;
 
-    }
-
-
-    if (!capModels[0]) {
-
-        console.warn(
-            'KEY 1 키캡이 없습니다.'
-        );
-
+    if (!capModels[0])
         return;
 
-    }
-
-
-    if (!capModels[slot]) {
-
-        console.warn(
-            `KEY ${
-                slot + 1
-            } 키캡이 없습니다.`
-        );
-
+    if (!capModels[slot])
         return;
-
-    }
 
 
     const referenceCenter =
@@ -1560,38 +1394,11 @@ function movePartToSlot(
         newLocalPosition
     );
 
-
-    console.log(
-        `KEY 1 → KEY ${
-            slot + 1
-        } 파츠 이동`
-    );
-
-
-    console.log(
-        'KEY 1 중심:',
-        referenceCenter
-    );
-
-
-    console.log(
-        `KEY ${
-            slot + 1
-        } 중심:`,
-        targetCenter
-    );
-
-
-    console.log(
-        '이동량:',
-        offset
-    );
-
 }
 
 
 // ============================================================
-// 파츠 하나 로드
+// 파츠 로드
 // ============================================================
 
 async function loadPartToSlot(
@@ -1617,11 +1424,6 @@ async function loadPartToSlot(
 
     try {
 
-        console.log(
-            `${partInfo.name} 로드 시작`
-        );
-
-
         const part =
             await loadGLB(
                 `./${partInfo.file}`
@@ -1639,15 +1441,6 @@ async function loadPartToSlot(
         );
 
 
-        console.log(
-            `KEY ${
-                slot + 1
-            }에 ${
-                partInfo.name
-            } 배치 완료`
-        );
-
-
         return part;
 
     }
@@ -1655,10 +1448,9 @@ async function loadPartToSlot(
     catch (error) {
 
         console.error(
-            `${partInfo.name} 로드 실패:`,
+            '파츠 로드 실패:',
             error
         );
-
 
         return null;
 
@@ -1668,7 +1460,7 @@ async function loadPartToSlot(
 
 
 // ============================================================
-// .all 파츠인지 확인
+// .all 확인
 // ============================================================
 
 function isAllPart(
@@ -1687,20 +1479,16 @@ function isAllPart(
 
 
 // ============================================================
-// .all → 기본 파츠 이름
-//
-// egg.all
-// → egg
-//
-// yakgwa.all
-// → yakgwa
+// .all 이름 → 일반 파츠
 // ============================================================
 
 function getBasePartName(
     partName
 ) {
 
-    if (!isAllPart(partName)) {
+    if (
+        !isAllPart(partName)
+    ) {
 
         return partName;
 
@@ -1716,16 +1504,12 @@ function getBasePartName(
 
 
 // ============================================================
-// ⭐ 전체 KEY에 .all 파츠 배치
+// 전체 파츠 배치
 // ============================================================
 
 async function loadPartToAllSlots(
     allPartName
 ) {
-
-    // --------------------------------------------------------
-    // egg.all → egg
-    // --------------------------------------------------------
 
     const basePartName =
         getBasePartName(
@@ -1733,36 +1517,16 @@ async function loadPartToAllSlots(
         );
 
 
-    // --------------------------------------------------------
-    // 실제 파츠 존재 확인
-    // --------------------------------------------------------
-
     const partInfo =
         PARTS[basePartName];
 
 
-    if (!partInfo) {
-
-        console.error(
-            '.all 대상 파츠가 없습니다:',
-            basePartName
-        );
-
+    if (!partInfo)
         return;
 
-    }
-
-
-    // --------------------------------------------------------
-    // 기존 파츠 전체 제거
-    // --------------------------------------------------------
 
     removeAllParts();
 
-
-    // --------------------------------------------------------
-    // KEY 1~6 전체 배치
-    // --------------------------------------------------------
 
     for (
         let i = 0;
@@ -1777,11 +1541,8 @@ async function loadPartToAllSlots(
             );
 
 
-        if (!part) {
-
+        if (!part)
             continue;
-
-        }
 
 
         partModels[i] =
@@ -1791,10 +1552,6 @@ async function loadPartToAllSlots(
         selectedParts[i] =
             basePartName;
 
-
-        // ----------------------------------------------------
-        // 3구 케이스
-        // ----------------------------------------------------
 
         if (
             isThreeKeyCase() &&
@@ -1810,33 +1567,10 @@ async function loadPartToAllSlots(
 
         }
 
-
-        // ----------------------------------------------------
-        // KEY 이름 표시
-        // ----------------------------------------------------
-
-        const nameElement =
-            document.getElementById(
-                `slotName${i}`
-            );
-
-
-        if (nameElement) {
-
-            nameElement.textContent =
-                partInfo.name;
-
-        }
-
     }
 
 
     updateThreeKeyCaseVisibility();
-
-
-    console.log(
-        `${allPartName} 전체 배치 완료`
-    );
 
 }
 
@@ -1850,74 +1584,46 @@ async function(
     partName
 ) {
 
-    console.log(
-        '--------------------------------'
-    );
-
-
-    console.log(
-        '선택한 파츠:',
-        partName
-    );
-
-
-    console.log(
-        '선택된 KEY:',
-        selectedSlot + 1
-    );
-
-
-    // ========================================================
-    // .all 파츠
-    // ========================================================
+    // 전체 제거
 
     if (
-        isAllPart(
-            partName
-        )
+        partName ===
+        'all-none'
     ) {
 
-        // .all 가격 등록 여부 확인
-        if (
-            ALL_PART_PRICES[
-                partName
-            ] === undefined
-        ) {
+        removeAllParts();
 
-            console.warn(
-                `${partName}의 .all 가격이 등록되지 않았습니다.`
-            );
-
-
-            alert(
-                `${partName}의 전체 배치 가격이 설정되지 않았습니다.`
-            );
-
-
-            return;
-
-        }
-
-
-        await loadPartToAllSlots(
-            partName
-        );
-
+        updateThreeKeyCaseVisibility();
 
         updatePrice();
 
-
         fitCameraToProduct();
-
 
         return;
 
     }
 
 
-    // ========================================================
-    // 3구 케이스에서 KEY 2 / 4 / 6 선택 방지
-    // ========================================================
+    // .all
+
+    if (
+        isAllPart(partName)
+    ) {
+
+        await loadPartToAllSlots(
+            partName
+        );
+
+        updatePrice();
+
+        fitCameraToProduct();
+
+        return;
+
+    }
+
+
+    // 3구 케이스 제한
 
     if (
         isThreeKeyCase() &&
@@ -1932,15 +1638,12 @@ async function(
             '3구 케이스에서는 KEY 2, 4, 6을 사용할 수 없습니다.'
         );
 
-
         return;
 
     }
 
 
-    // ========================================================
-    // NONE
-    // ========================================================
+    // 없음
 
     if (
         partName === 'none'
@@ -1950,74 +1653,33 @@ async function(
             selectedSlot
         );
 
-
         updatePrice();
 
-
         fitCameraToProduct();
-
 
         return;
 
     }
 
-    // ========================================================
-    // ALL NONE
-    // 전체 KEY의 파츠 제거
-    // ========================================================
-
-    if (
-    partName === 'all-none'
-    ) {
-
-    removeAllParts();
-
-
-    updateThreeKeyCaseVisibility();
-
-
-    updatePrice();
-
-
-    fitCameraToProduct();
-
-
-    return;
-
-    }
-
-
-    // ========================================================
-    // 파츠 등록 여부 확인
-    // ========================================================
 
     if (
         !PARTS[partName]
     ) {
 
         console.error(
-            'PARTS에 등록되지 않은 파츠입니다:',
+            '등록되지 않은 파츠:',
             partName
         );
-
 
         return;
 
     }
 
 
-    // ========================================================
-    // 기존 파츠 제거
-    // ========================================================
-
     removePartFromSlot(
         selectedSlot
     );
 
-
-    // ========================================================
-    // 새 파츠 로드
-    // ========================================================
 
     const part =
         await loadPartToSlot(
@@ -2026,18 +1688,9 @@ async function(
         );
 
 
-    if (!part) {
-
-        updatePrice();
-
+    if (!part)
         return;
 
-    }
-
-
-    // ========================================================
-    // 현재 KEY에 저장
-    // ========================================================
 
     partModels[
         selectedSlot
@@ -2049,52 +1702,277 @@ async function(
     ] = partName;
 
 
-    // ========================================================
-    // 현재 KEY 이름 표시
-    // ========================================================
+    updateThreeKeyCaseVisibility();
 
-    const nameElement =
-        document.getElementById(
-            `slotName${selectedSlot}`
+    updatePrice();
+
+    fitCameraToProduct();
+
+};
+
+
+// ============================================================
+// 축 제거
+// ============================================================
+
+function removeSwitches() {
+
+    for (
+        let i = 0;
+        i < 6;
+        i++
+    ) {
+
+        if (
+            switchModels[i]
+        ) {
+
+            productGroup.remove(
+                switchModels[i]
+            );
+
+            switchModels[i] =
+                null;
+
+        }
+
+    }
+
+}
+
+
+// ============================================================
+// 축 이동
+// ============================================================
+
+function moveSwitchToSlot(
+    switchModel,
+    slot
+) {
+
+    if (!switchModel)
+        return;
+
+    if (!capModels[0])
+        return;
+
+    if (!capModels[slot])
+        return;
+
+
+    const referenceCenter =
+        getModelWorldCenter(
+            capModels[0]
         );
 
 
-    if (nameElement) {
-
-        const partInfo =
-            PARTS[partName];
-
-
-        nameElement.textContent =
-            partInfo
-                ? partInfo.name
-                : '비어있음';
-
-    }
+    const targetCenter =
+        getModelWorldCenter(
+            capModels[slot]
+        );
 
 
-    // ========================================================
-    // 3구 케이스 여부에 따른 표시
-    // ========================================================
+    const offset =
+        targetCenter
+            .clone()
+            .sub(
+                referenceCenter
+            );
 
-    if (
-        isThreeKeyCase() &&
-        (
-            selectedSlot === 1 ||
-            selectedSlot === 3 ||
-            selectedSlot === 5
-        )
+
+    const currentWorldPosition =
+        new THREE.Vector3();
+
+
+    switchModel.getWorldPosition(
+        currentWorldPosition
+    );
+
+
+    const newWorldPosition =
+        currentWorldPosition
+            .clone()
+            .add(
+                offset
+            );
+
+
+    const newLocalPosition =
+        productGroup.worldToLocal(
+            newWorldPosition
+        );
+
+
+    switchModel.position.copy(
+        newLocalPosition
+    );
+
+}
+
+
+// ============================================================
+// 선택 축 전체 KEY에 배치
+// ============================================================
+
+async function loadSwitchToAllSlots(
+    switchName
+) {
+
+    const switchInfo =
+        SWITCH_OPTIONS[
+            switchName
+        ];
+
+
+    if (!switchInfo)
+        return;
+
+
+    removeSwitches();
+
+
+    for (
+        let i = 0;
+        i < 6;
+        i++
     ) {
 
-        part.visible =
-            false;
+        if (
+            isThreeKeyCase() &&
+            (
+                i === 1 ||
+                i === 3 ||
+                i === 5
+            )
+        ) {
+
+            continue;
+
+        }
+
+
+        try {
+
+            const model =
+                await loadGLB(
+                    `./${switchInfo.file}`
+                );
+
+
+            productGroup.add(
+                model
+            );
+
+
+            moveSwitchToSlot(
+                model,
+                i
+            );
+
+
+            switchModels[i] =
+                model;
+
+        }
+
+        catch (error) {
+
+            console.error(
+                `${switchInfo.name} 로드 실패:`,
+                error
+            );
+
+        }
 
     }
 
 
-    // ========================================================
-    // 가격 업데이트
-    // ========================================================
+    updateThreeKeyCaseVisibility();
+
+}
+
+
+// ============================================================
+// 축 재로드
+// ============================================================
+
+async function reloadSelectedSwitch() {
+
+    if (
+        !SWITCH_OPTIONS[
+            selectedSwitch
+        ]
+    ) {
+
+        return;
+
+    }
+
+
+    await loadSwitchToAllSlots(
+        selectedSwitch
+    );
+
+}
+
+
+// ============================================================
+// ⭐ 축 선택
+// ============================================================
+
+window.selectSwitch =
+async function(
+    switchName,
+    element
+) {
+
+    if (
+        !SWITCH_OPTIONS[
+            switchName
+        ]
+    ) {
+
+        return;
+
+    }
+
+
+    selectedSwitch =
+        switchName;
+
+
+    // 모든 리스트 비활성화
+
+    document
+        .querySelectorAll(
+            '[data-switch]'
+        )
+        .forEach(item => {
+
+            item.classList.remove(
+                'active'
+            );
+
+        });
+
+
+    // 선택된 리스트 활성화
+
+    if (element) {
+
+        element.classList.add(
+            'active'
+        );
+
+    }
+
+
+    // 실제 3D 축 변경
+
+    await loadSwitchToAllSlots(
+        selectedSwitch
+    );
+
 
     updatePrice();
 
@@ -2105,18 +1983,7 @@ async function(
 
 
 // ============================================================
-// ⭐ 현재 선택된 .all 파츠 찾기
-//
-// selectedParts에 같은 파츠가 6개 들어있으면
-// 해당 파츠가 .all로 선택된 것으로 판단합니다.
-//
-// 예:
-//
-// [egg, egg, egg, egg, egg, egg]
-// → egg.all
-//
-// [egg, egg, yakgwa, egg, egg, egg]
-// → 일반 개별 선택으로 계산
+// .all 파츠 확인
 // ============================================================
 
 function getSelectedAllPart() {
@@ -2134,11 +2001,8 @@ function getSelectedAllPart() {
         selectedParts[0];
 
 
-    if (!firstPart) {
-
+    if (!firstPart)
         return null;
-
-    }
 
 
     for (
@@ -2180,43 +2044,7 @@ function getSelectedAllPart() {
 
 
 // ============================================================
-// ⭐ 가격 계산
-//
-// 총 금액:
-//
-// 기본 제품 가격
-// +
-// 케이스 추가금
-// +
-// 일반 파츠 추가금
-// +
-// .all 파츠 추가금
-//
-// ------------------------------------------------------------
-//
-// 일반 파츠:
-//
-// egg × 1
-// → +1,000원
-//
-// egg × 2
-// → +2,000원
-//
-// ------------------------------------------------------------
-//
-// .all 파츠:
-//
-// egg.all
-// → KEY 1~6 전체 배치
-// → 설정된 egg.all 가격만 추가
-//
-// 예:
-// egg.all = 5,000원
-//
-// → +5,000원
-//
-// KEY 6개라고 해서
-// 1,000 × 6 = 6,000원으로 계산하지 않습니다.
+// 가격
 // ============================================================
 
 function updatePrice() {
@@ -2225,9 +2053,7 @@ function updatePrice() {
         0;
 
 
-    // ========================================================
-    // 1. 케이스 추가금액
-    // ========================================================
+    // 케이스
 
     const baseOption =
         BASE_OPTIONS[
@@ -2235,29 +2061,31 @@ function updatePrice() {
         ];
 
 
-    let baseOptionPrice =
-        0;
+    const baseOptionPrice =
+        baseOption
+            ? baseOption.price
+            : 0;
 
 
-    if (baseOption) {
+    // 축
 
-        baseOptionPrice =
-            baseOption.price;
+    const switchOption =
+        SWITCH_OPTIONS[
+            selectedSwitch
+        ];
 
-    }
+
+    const switchPrice =
+        switchOption
+            ? switchOption.price
+            : 0;
 
 
-    // ========================================================
-    // 2. .all 파츠인지 확인
-    // ========================================================
+    // 전체 파츠
 
     const selectedAllPart =
         getSelectedAllPart();
 
-
-    // ========================================================
-    // 3. .all 파츠
-    // ========================================================
 
     if (selectedAllPart) {
 
@@ -2267,11 +2095,6 @@ function updatePrice() {
             ];
 
     }
-
-
-    // ========================================================
-    // 4. 일반 파츠
-    // ========================================================
 
     else {
 
@@ -2305,23 +2128,26 @@ function updatePrice() {
     }
 
 
-    // ========================================================
-    // 5. 총 금액
-    // ========================================================
+    // 총 금액
 
     const totalPrice =
         BASE_PRICE +
         baseOptionPrice +
+        switchPrice +
         partPrice;
 
 
-    // ========================================================
     // 화면 표시
-    // ========================================================
 
     const basePriceElement =
         document.getElementById(
             'basePrice'
+        );
+
+
+    const switchPriceElement =
+        document.getElementById(
+            'switchPrice'
         );
 
 
@@ -2337,9 +2163,7 @@ function updatePrice() {
         );
 
 
-    if (
-        basePriceElement
-    ) {
+    if (basePriceElement) {
 
         basePriceElement.textContent =
             (
@@ -2353,9 +2177,18 @@ function updatePrice() {
     }
 
 
-    if (
-        partPriceElement
-    ) {
+    if (switchPriceElement) {
+
+        switchPriceElement.textContent =
+            switchPrice.toLocaleString(
+                'ko-KR'
+            ) +
+            '원';
+
+    }
+
+
+    if (partPriceElement) {
 
         partPriceElement.textContent =
             partPrice.toLocaleString(
@@ -2366,9 +2199,7 @@ function updatePrice() {
     }
 
 
-    if (
-        totalPriceElement
-    ) {
+    if (totalPriceElement) {
 
         totalPriceElement.textContent =
             totalPrice.toLocaleString(
@@ -2377,50 +2208,6 @@ function updatePrice() {
             '원';
 
     }
-
-
-    // ========================================================
-    // 콘솔 확인
-    // ========================================================
-
-    console.log(
-        '----------------------------'
-    );
-
-
-    console.log(
-        '기본 제품 가격:',
-        BASE_PRICE
-    );
-
-
-    console.log(
-        '케이스 추가금:',
-        baseOptionPrice
-    );
-
-
-    console.log(
-        '파츠 추가금:',
-        partPrice
-    );
-
-
-    console.log(
-        '.all 선택:',
-        selectedAllPart
-    );
-
-
-    console.log(
-        '총 금액:',
-        totalPrice
-    );
-
-
-    console.log(
-        '----------------------------'
-    );
 
 }
 
@@ -2439,6 +2226,18 @@ function() {
 
         type:
             selectedType,
+
+        switch:
+            selectedSwitch,
+
+        switchName:
+            SWITCH_OPTIONS[
+                selectedSwitch
+            ]
+                ? SWITCH_OPTIONS[
+                    selectedSwitch
+                ].name
+                : '',
 
         baseColor:
             selectedBaseColor,
@@ -2459,40 +2258,18 @@ function() {
 
 
     alert(
-
         '현재는 테스트 버전입니다.\n\n' +
-
-        '선택한 구성은\n' +
-
-        'F12 → Console\n\n' +
-
-        '에서 확인할 수 있습니다.'
-
+        '선택한 구성은 F12 → Console에서 확인할 수 있습니다.'
     );
 
 };
 
 
 // ============================================================
-// 초기 실행
+// 초기화
 // ============================================================
 
 async function init() {
-
-    console.log(
-        '================================'
-    );
-
-
-    console.log(
-        'FOMORA 3D START'
-    );
-
-
-    console.log(
-        '================================'
-    );
-
 
     await loadBase(
         'case.glb'
@@ -2504,25 +2281,15 @@ async function init() {
     );
 
 
+    await loadSwitchToAllSlots(
+        selectedSwitch
+    );
+
+
     updatePrice();
 
 
     fitCameraToProduct();
-
-
-    console.log(
-        '================================'
-    );
-
-
-    console.log(
-        'FOMORA 3D READY'
-    );
-
-
-    console.log(
-        '================================'
-    );
 
 }
 

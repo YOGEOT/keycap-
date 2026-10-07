@@ -10,7 +10,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Clicker 3D Custom</title>
+    <title>FOMORA CUSTOM</title>
 
 
     <style>
@@ -24,7 +24,7 @@
             margin: 0;
             font-family: Arial, sans-serif;
             background: #eeeeee;
-            color: #333;
+            color: #333333;
         }
 
 
@@ -36,9 +36,9 @@
         }
 
 
-        /* =========================
-           3D VIEWER
-        ========================= */
+        /* ====================================================
+           3D
+        ==================================================== */
 
         .viewer {
             flex: 1;
@@ -53,9 +53,9 @@
         }
 
 
-        /* =========================
-           RIGHT PANEL
-        ========================= */
+        /* ====================================================
+           PANEL
+        ==================================================== */
 
         .panel {
             width: 380px;
@@ -85,9 +85,9 @@
         }
 
 
-        /* =========================
-           OPTION GRID
-        ========================= */
+        /* ====================================================
+           OPTION
+        ==================================================== */
 
         .option-grid {
             display: grid;
@@ -128,7 +128,9 @@
 
             font-size: 13px;
             color: #888888;
+
             margin-bottom: 8px;
+            overflow: hidden;
         }
 
 
@@ -144,9 +146,9 @@
         }
 
 
-        /* =========================
+        /* ====================================================
            SLOT
-        ========================= */
+        ==================================================== */
 
         .slot-grid {
             display: grid;
@@ -171,9 +173,19 @@
         }
 
 
-        /* =========================
+        .selected-slot-info {
+            margin-top: 10px;
+            padding: 10px 12px;
+            background: #f7f7f7;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #666666;
+        }
+
+
+        /* ====================================================
            COLOR
-        ========================= */
+        ==================================================== */
 
         .color-grid {
             display: flex;
@@ -197,9 +209,107 @@
         }
 
 
-        /* =========================
+        /* ====================================================
+           ⭐ 축 리스트
+        ==================================================== */
+
+        .switch-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+
+        .switch-item {
+            width: 100%;
+            min-height: 58px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 16px;
+
+            background: #ffffff;
+
+            border: 1px solid #dddddd;
+            border-radius: 10px;
+
+            cursor: pointer;
+
+            transition:
+                border-color 0.15s,
+                background 0.15s;
+        }
+
+
+        .switch-item:hover {
+            border-color: #999999;
+        }
+
+
+        .switch-item.active {
+            border: 2px solid #333333;
+            background: #fafafa;
+        }
+
+
+        .switch-left {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+
+        /* 실제 radio 표시 */
+
+        .switch-radio {
+            width: 18px;
+            height: 18px;
+
+            border: 1.5px solid #999999;
+            border-radius: 50%;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+
+        .switch-item.active
+        .switch-radio {
+            border-color: #333333;
+        }
+
+
+        .switch-item.active
+        .switch-radio::after {
+            content: "";
+
+            width: 9px;
+            height: 9px;
+
+            background: #333333;
+
+            border-radius: 50%;
+        }
+
+
+        .switch-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+
+        .switch-price {
+            font-size: 13px;
+            color: #777777;
+        }
+
+
+        /* ====================================================
            PRICE
-        ========================= */
+        ==================================================== */
 
         .price-box {
             border-top: 1px solid #eeeeee;
@@ -218,9 +328,12 @@
         .price-total {
             display: flex;
             justify-content: space-between;
+
             margin-top: 14px;
             padding-top: 14px;
+
             border-top: 1px solid #eeeeee;
+
             font-size: 18px;
             font-weight: bold;
         }
@@ -228,13 +341,18 @@
 
         .buy-button {
             width: 100%;
+
             margin-top: 18px;
             padding: 15px;
+
             border: none;
             border-radius: 10px;
+
             background: #222222;
-            color: white;
+            color: #ffffff;
+
             font-size: 15px;
+
             cursor: pointer;
         }
 
@@ -244,23 +362,9 @@
         }
 
 
-        /* =========================
-           SELECTED SLOT INFO
-        ========================= */
-
-        .selected-slot-info {
-            margin-top: 10px;
-            padding: 10px 12px;
-            background: #f7f7f7;
-            border-radius: 8px;
-            font-size: 13px;
-            color: #666666;
-        }
-
-
-        /* =========================
-           모바일
-        ========================= */
+        /* ====================================================
+           MOBILE
+        ==================================================== */
 
         @media (max-width: 900px) {
 
@@ -278,7 +382,7 @@
             .panel {
                 width: 100%;
                 height: auto;
-                border-top: 1px solid #ddd;
+                border-top: 1px solid #dddddd;
                 border-left: none;
             }
 
@@ -295,9 +399,9 @@
 <div class="page">
 
 
-    <!-- =========================
+    <!-- ====================================================
          3D VIEWER
-    ========================= -->
+    ==================================================== -->
 
     <div class="viewer">
 
@@ -307,22 +411,22 @@
 
 
 
-    <!-- =========================
+    <!-- ====================================================
          OPTION PANEL
-    ========================= -->
+    ==================================================== -->
 
     <div class="panel">
 
 
         <h1>
-            CLICKER CUSTOM 
+            FOMORA CUSTOM
         </h1>
 
 
 
-        <!-- =========================
-             BASE
-        ========================= -->
+        <!-- ==================================================
+             케이스
+        ================================================== -->
 
         <div class="section">
 
@@ -334,12 +438,9 @@
             <div class="option-grid">
 
 
-                <!-- 베이직 -->
-
                 <div
                     class="option active"
                     data-base="case.glb"
-                    data-price="15900"
                     onclick="selectBase(this)"
                 >
 
@@ -347,11 +448,9 @@
                         BASIC
                     </div>
 
-
                     <div class="option-name">
                         베이직
                     </div>
-
 
                     <div class="option-price">
                         15,900원
@@ -360,13 +459,9 @@
                 </div>
 
 
-
-                <!-- 패턴 -->
-
                 <div
                     class="option"
                     data-base="pattern_case.glb"
-                    data-price="16900"
                     onclick="selectBase(this)"
                 >
 
@@ -374,11 +469,9 @@
                         PATTERN
                     </div>
 
-
                     <div class="option-name">
                         패턴
                     </div>
-
 
                     <div class="option-price">
                         16,900원
@@ -387,13 +480,9 @@
                 </div>
 
 
-
-                <!-- 3구 케이스 -->
-
                 <div
                     class="option"
                     data-base="case_3botton.glb"
-                    data-price="11900"
                     onclick="selectBase(this)"
                 >
 
@@ -401,11 +490,9 @@
                         3 KEY
                     </div>
 
-
                     <div class="option-name">
                         3구 케이스
                     </div>
-
 
                     <div class="option-price">
                         11,900원
@@ -420,9 +507,9 @@
 
 
 
-        <!-- =========================
-             TYPE
-        ========================= -->
+        <!-- ==================================================
+             키캡 타입
+        ================================================== -->
 
         <div class="section">
 
@@ -444,13 +531,11 @@
                         TYPE A
                     </div>
 
-
                     <div class="option-name">
                         TYPE A
                     </div>
 
                 </div>
-
 
 
                 <div
@@ -463,13 +548,11 @@
                         TYPE B
                     </div>
 
-
                     <div class="option-name">
                         TYPE B
                     </div>
 
                 </div>
-
 
 
                 <div
@@ -481,7 +564,6 @@
                     <div class="option-image">
                         TYPE C
                     </div>
-
 
                     <div class="option-name">
                         TYPE C
@@ -496,9 +578,9 @@
 
 
 
-        <!-- =========================
-             KEY SLOT
-        ========================= -->
+        <!-- ==================================================
+             KEY
+        ================================================== -->
 
         <div class="section">
 
@@ -569,9 +651,9 @@
 
 
 
-        <!-- =========================
-             BASE COLOR
-        ========================= -->
+        <!-- ==================================================
+             케이스 색상
+        ================================================== -->
 
         <div class="section">
 
@@ -585,8 +667,8 @@
 
                 <div
                     class="color active"
-                    style="background:#303030"
-                    onclick="changeBaseColor('#303030', this)"
+                    style="background:#ff8bd1"
+                    onclick="changeBaseColor('#ff8bd1', this)"
                 ></div>
 
 
@@ -599,8 +681,8 @@
 
                 <div
                     class="color"
-                    style="background:#41362c"
-                    onclick="changeBaseColor('#41362c', this)"
+                    style="background:#303030"
+                    onclick="changeBaseColor('#303030', this)"
                 ></div>
 
 
@@ -631,9 +713,9 @@
 
 
 
-        <!-- =========================
-             KEYCAP COLOR
-        ========================= -->
+        <!-- ==================================================
+             키캡 색상
+        ================================================== -->
 
         <div class="section">
 
@@ -647,9 +729,9 @@
 
                 <div
                     class="color active"
-                    data-keycap-color="#303030"
-                    style="background:#303030"
-                    onclick="changeKeycapColor('#303030', this)"
+                    data-keycap-color="#ff8bd1"
+                    style="background:#ff8bd1"
+                    onclick="changeKeycapColor('#ff8bd1', this)"
                 ></div>
 
 
@@ -663,9 +745,9 @@
 
                 <div
                     class="color"
-                    data-keycap-color="#41362c"
-                    style="background:#41362c"
-                    onclick="changeKeycapColor('#41362c', this)"
+                    data-keycap-color="#303030"
+                    style="background:#303030"
+                    onclick="changeKeycapColor('#303030', this)"
                 ></div>
 
 
@@ -699,9 +781,9 @@
 
 
 
-        <!-- =========================
-             PARTS
-        ========================= -->
+        <!-- ==================================================
+             파츠
+        ================================================== -->
 
         <div class="section">
 
@@ -713,10 +795,8 @@
             <div class="option-grid">
 
 
-                <!-- 없음 -->
-
                 <div
-                    class="option active"
+                    class="option"
                     onclick="selectPart('none')"
                 >
 
@@ -724,11 +804,9 @@
                         NONE
                     </div>
 
-
                     <div class="option-name">
                         없음
                     </div>
-
 
                     <div class="option-price">
                         -
@@ -736,7 +814,6 @@
 
                 </div>
 
-                <!-- 전체 파츠 제거 -->
 
                 <div
                     class="option"
@@ -744,14 +821,12 @@
                 >
 
                     <div class="option-image">
-                        ALLNONE
+                        ALL NONE
                     </div>
-
 
                     <div class="option-name">
-                        전체제거
+                        전체 제거
                     </div>
-
 
                     <div class="option-price">
                         -
@@ -759,15 +834,9 @@
 
                 </div>
 
-                
-                
-
-
-                <!-- 닭 -->
 
                 <div
                     class="option"
-                    data-part="chicken"
                     onclick="selectPart('chicken')"
                 >
 
@@ -775,11 +844,9 @@
                         CHICKEN
                     </div>
 
-
                     <div class="option-name">
                         닭
                     </div>
-
 
                     <div class="option-price">
                         +1,500원
@@ -788,12 +855,8 @@
                 </div>
 
 
-
-                <!-- 병아리 -->
-
                 <div
                     class="option"
-                    data-part="chick"
                     onclick="selectPart('chick')"
                 >
 
@@ -801,11 +864,9 @@
                         CHICK
                     </div>
 
-
                     <div class="option-name">
                         병아리
                     </div>
-
 
                     <div class="option-price">
                         +1,500원
@@ -814,12 +875,8 @@
                 </div>
 
 
-
-                <!-- 달걀 -->
-
                 <div
                     class="option"
-                    data-part="egg"
                     onclick="selectPart('egg')"
                 >
 
@@ -827,11 +884,9 @@
                         EGG
                     </div>
 
-
                     <div class="option-name">
                         달걀
                     </div>
-
 
                     <div class="option-price">
                         +1,000원
@@ -839,12 +894,9 @@
 
                 </div>
 
-            
-                <!-- 타코야키 -->
 
                 <div
                     class="option"
-                    data-part="takoyaki"
                     onclick="selectPart('takoyaki')"
                 >
 
@@ -852,11 +904,9 @@
                         TAKOYAKI
                     </div>
 
-
                     <div class="option-name">
                         타코야키
                     </div>
-
 
                     <div class="option-price">
                         +1,000원
@@ -865,12 +915,8 @@
                 </div>
 
 
-
-                <!-- 약과 -->
-
                 <div
                     class="option"
-                    data-part="yakgwa"
                     onclick="selectPart('yakgwa')"
                 >
 
@@ -878,11 +924,9 @@
                         YAKGWA
                     </div>
 
-
                     <div class="option-name">
                         약과
                     </div>
-
 
                     <div class="option-price">
                         +800원
@@ -891,12 +935,8 @@
                 </div>
 
 
-
-                <!-- 와플 -->
-
                 <div
                     class="option"
-                    data-part="wafle"
                     onclick="selectPart('wafle')"
                 >
 
@@ -904,11 +944,9 @@
                         WAFLE
                     </div>
 
-
                     <div class="option-name">
                         와플
                     </div>
-
 
                     <div class="option-price">
                         +1,000원
@@ -917,12 +955,8 @@
                 </div>
 
 
-
-                <!-- 국화 -->
-
                 <div
                     class="option"
-                    data-part="gukhwa"
                     onclick="selectPart('gukhwa')"
                 >
 
@@ -930,11 +964,9 @@
                         GUKHWA
                     </div>
 
-
                     <div class="option-name">
                         국화
                     </div>
-
 
                     <div class="option-price">
                         +1,000원
@@ -943,12 +975,8 @@
                 </div>
 
 
-
-                <!-- 십원 -->
-
                 <div
                     class="option"
-                    data-part="sibwon"
                     onclick="selectPart('sibwon')"
                 >
 
@@ -956,11 +984,9 @@
                         SIBWON
                     </div>
 
-
                     <div class="option-name">
                         십원
                     </div>
-
 
                     <div class="option-price">
                         +1,000원
@@ -969,12 +995,8 @@
                 </div>
 
 
-
-                <!-- 피넛 -->
-
                 <div
                     class="option"
-                    data-part="peanut"
                     onclick="selectPart('peanut')"
                 >
 
@@ -982,11 +1004,9 @@
                         PEANUT
                     </div>
 
-
                     <div class="option-name">
                         피넛
                     </div>
-
 
                     <div class="option-price">
                         +1,000원
@@ -995,12 +1015,8 @@
                 </div>
 
 
-
-                <!-- 호두 -->
-
                 <div
                     class="option"
-                    data-part="hodu"
                     onclick="selectPart('hodu')"
                 >
 
@@ -1008,11 +1024,9 @@
                         HODU
                     </div>
 
-
                     <div class="option-name">
                         호두
                     </div>
-
 
                     <div class="option-price">
                         +1,000원
@@ -1020,11 +1034,9 @@
 
                 </div>
 
-                <!-- 복숭아 -->
 
                 <div
                     class="option"
-                    data-part="peach"
                     onclick="selectPart('peach')"
                 >
 
@@ -1032,23 +1044,19 @@
                         PEACH
                     </div>
 
-
                     <div class="option-name">
                         복숭아
                     </div>
 
-
                     <div class="option-price">
-                        +500원
+                        +1,000원
                     </div>
 
                 </div>
 
-                <!-- 사과 -->
 
                 <div
                     class="option"
-                    data-part="apple"
                     onclick="selectPart('apple')"
                 >
 
@@ -1056,71 +1064,59 @@
                         APPLE
                     </div>
 
-
                     <div class="option-name">
                         사과
                     </div>
 
-
                     <div class="option-price">
-                        +500원
+                        +1,000원
                     </div>
 
                 </div>
 
-                <!-- 마쉬멜로우.01 -->
 
                 <div
                     class="option"
-                    data-part="marshmallow.01"
                     onclick="selectPart('marshmallow.01')"
                 >
 
                     <div class="option-image">
-                        MARSHMALLOW.01
+                        MARSHMALLOW 01
                     </div>
-
 
                     <div class="option-name">
                         마쉬멜로우.01
                     </div>
 
-
                     <div class="option-price">
-                        +1000원
+                        +1,000원
                     </div>
 
                 </div>
 
-                <!-- 마쉬멜로우.02 -->
 
                 <div
                     class="option"
-                    data-part="marshmallow.02"
                     onclick="selectPart('marshmallow.02')"
                 >
 
                     <div class="option-image">
-                        MARSHMALLOW.02
+                        MARSHMALLOW 02
                     </div>
-
 
                     <div class="option-name">
                         마쉬멜로우.02
                     </div>
 
-
                     <div class="option-price">
-                        +1000원
+                        +1,000원
                     </div>
 
                 </div>
 
-                <!-- 마카롱 -->
 
                 <div
                     class="option"
-                    data-part="macaron"
                     onclick="selectPart('macaron')"
                 >
 
@@ -1128,24 +1124,19 @@
                         MACARON
                     </div>
 
-
                     <div class="option-name">
                         마카롱
                     </div>
 
-
                     <div class="option-price">
-                        +800원
+                        +1,000원
                     </div>
 
                 </div>
 
 
-                 <!-- 입술 -->
-
                 <div
                     class="option"
-                    data-part="lip"
                     onclick="selectPart('lip')"
                 >
 
@@ -1153,11 +1144,9 @@
                         LIP
                     </div>
 
-
                     <div class="option-name">
                         입술
                     </div>
-
 
                     <div class="option-price">
                         +1,000원
@@ -1166,23 +1155,200 @@
                 </div>
 
 
-                <!-- 입술전체 -->
+                <!-- 전체 배치 -->
 
                 <div
                     class="option"
-                    data-part="lip.all"
+                    onclick="selectPart('peach.all')"
+                >
+
+                    <div class="option-image">
+                        PEACH ALL
+                    </div>
+
+                    <div class="option-name">
+                        복숭아 전체
+                    </div>
+
+                    <div class="option-price">
+                        +1,000원
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="option"
+                    onclick="selectPart('apple.all')"
+                >
+
+                    <div class="option-image">
+                        APPLE ALL
+                    </div>
+
+                    <div class="option-name">
+                        사과 전체
+                    </div>
+
+                    <div class="option-price">
+                        +1,000원
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="option"
+                    onclick="selectPart('egg.all')"
+                >
+
+                    <div class="option-image">
+                        EGG ALL
+                    </div>
+
+                    <div class="option-name">
+                        달걀 전체
+                    </div>
+
+                    <div class="option-price">
+                        +4,000원
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="option"
+                    onclick="selectPart('takoyaki.all')"
+                >
+
+                    <div class="option-image">
+                        TAKOYAKI ALL
+                    </div>
+
+                    <div class="option-name">
+                        타코야키 전체
+                    </div>
+
+                    <div class="option-price">
+                        +4,000원
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="option"
+                    onclick="selectPart('wafle.all')"
+                >
+
+                    <div class="option-image">
+                        WAFLE ALL
+                    </div>
+
+                    <div class="option-name">
+                        와플 전체
+                    </div>
+
+                    <div class="option-price">
+                        +4,000원
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="option"
+                    onclick="selectPart('peanut.all')"
+                >
+
+                    <div class="option-image">
+                        PEANUT ALL
+                    </div>
+
+                    <div class="option-name">
+                        피넛 전체
+                    </div>
+
+                    <div class="option-price">
+                        +4,000원
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="option"
+                    onclick="selectPart('hodu.all')"
+                >
+
+                    <div class="option-image">
+                        HODU ALL
+                    </div>
+
+                    <div class="option-name">
+                        호두 전체
+                    </div>
+
+                    <div class="option-price">
+                        +4,000원
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="option"
+                    onclick="selectPart('gukhwa.all')"
+                >
+
+                    <div class="option-image">
+                        GUKHWA ALL
+                    </div>
+
+                    <div class="option-name">
+                        국화 전체
+                    </div>
+
+                    <div class="option-price">
+                        +4,000원
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="option"
+                    onclick="selectPart('sibwon.all')"
+                >
+
+                    <div class="option-image">
+                        SIBWON ALL
+                    </div>
+
+                    <div class="option-name">
+                        십원 전체
+                    </div>
+
+                    <div class="option-price">
+                        +4,000원
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="option"
                     onclick="selectPart('lip.all')"
                 >
 
                     <div class="option-image">
-                        LIPALL
+                        LIP ALL
                     </div>
-
 
                     <div class="option-name">
-                        입술전체
+                        입술 전체
                     </div>
-
 
                     <div class="option-price">
                         +3,000원
@@ -1190,315 +1356,82 @@
 
                 </div>
 
-                <!-- 약과전체 -->
 
                 <div
                     class="option"
-                    data-part="yakgwa.all"
-                    onclick="selectPart('yakgwa.all')"
-                >
-
-                    <div class="option-image">
-                        YAKGWAALL
-                    </div>
-
-
-                    <div class="option-name">
-                        약과전체
-                    </div>
-
-
-                    <div class="option-price">
-                        +3000원
-                    </div>
-
-                </div>
-
-                <!-- 달걀전체 -->
-
-                <div
-                    class="option"
-                    data-part="egg.all"
-                    onclick="selectPart('egg.all')"
-                >
-
-                    <div class="option-image">
-                        EGGALL
-                    </div>
-
-
-                    <div class="option-name">
-                        달걀전체
-                    </div>
-
-
-                    <div class="option-price">
-                        +4,000원
-                    </div>
-
-                </div>
-
-                <!-- 타코야키전체 -->
-
-                <div
-                    class="option"
-                    data-part="takoyaki.all"
-                    onclick="selectPart('takoyaki.all')"
-                >
-
-                    <div class="option-image">
-                        TAKOYAKIALL
-                    </div>
-
-
-                    <div class="option-name">
-                        타코야키전체
-                    </div>
-
-
-                    <div class="option-price">
-                        +4,000원
-                    </div>
-
-                </div>
-
-                
-                <!-- 와플전체 -->
-
-                <div
-                    class="option"
-                    data-part="wafle.all"
-                    onclick="selectPart('wafle.all')"
-                >
-
-                    <div class="option-image">
-                        WAFLEALL
-                    </div>
-
-
-                    <div class="option-name">
-                        와플전체
-                    </div>
-
-
-                    <div class="option-price">
-                        +4,000원
-                    </div>
-
-                </div>
-
-                <!-- 피넛전체 -->
-
-                <div
-                    class="option"
-                    data-part="peanut.all"
-                    onclick="selectPart('peanut.all')"
-                >
-
-                    <div class="option-image">
-                        PEANUTALL
-                    </div>
-
-
-                    <div class="option-name">
-                        피넛전체
-                    </div>
-
-
-                    <div class="option-price">
-                        +4,000원
-                    </div>
-
-                </div>
-
-                <!-- 호두전체 -->
-
-                <div
-                    class="option"
-                    data-part="hodu.all"
-                    onclick="selectPart('hodu.all')"
-                >
-
-                    <div class="option-image">
-                        HODUALL
-                    </div>
-
-
-                    <div class="option-name">
-                        호두전체
-                    </div>
-
-
-                    <div class="option-price">
-                        +4,000원
-                    </div>
-
-                </div>
-
-                <!-- 국화전체 -->
-
-                <div
-                    class="option"
-                    data-part="gukhwa.all"
-                    onclick="selectPart('gukhwa.all')"
-                >
-
-                    <div class="option-image">
-                        GUKHWAALL
-                    </div>
-
-
-                    <div class="option-name">
-                        국화전체
-                    </div>
-
-
-                    <div class="option-price">
-                        +4,000원
-                    </div>
-
-                </div>
-
-                <!-- 십원전체 -->
-
-                <div
-                    class="option"
-                    data-part="sibwon.all"
-                    onclick="selectPart('sibwon.all')"
-                >
-
-                    <div class="option-image">
-                        SIBWONALL
-                    </div>
-
-
-                    <div class="option-name">
-                        십원전체
-                    </div>
-
-
-                    <div class="option-price">
-                        +4,000원
-                    </div>
-
-                </div>
-
-                <!-- 복숭아전체 -->
-
-                <div
-                    class="option"
-                    data-part="peach.all"
-                    onclick="selectPart('peach.all')"
-                >
-
-                    <div class="option-image">
-                        PEACHALL
-                    </div>
-
-
-                    <div class="option-name">
-                        복숭아전체
-                    </div>
-
-
-                    <div class="option-price">
-                        +1,000원
-                    </div>
-
-                </div>
-
-                <!-- 사과전체 -->
-
-                <div
-                    class="option"
-                    data-part="apple.all"
-                    onclick="selectPart('apple.all')"
-                >
-
-                    <div class="option-image">
-                        APPLEALL
-                    </div>
-
-
-                    <div class="option-name">
-                        사과전체
-                    </div>
-
-
-                    <div class="option-price">
-                        +1,000원
-                    </div>
-
-                </div>
-
-                <!-- 마쉬멜로우.01전체 -->
-
-                <div
-                    class="option"
-                    data-part="marshmallow.01.all"
                     onclick="selectPart('marshmallow.01.all')"
                 >
 
                     <div class="option-image">
-                        MARSHMALLOW.01ALL
+                        MARSHMALLOW 01 ALL
                     </div>
-
 
                     <div class="option-name">
                         마쉬멜로우.01 전체
                     </div>
 
-
                     <div class="option-price">
-                        +4000원
+                        +4,000원
                     </div>
 
                 </div>
 
-                <!-- 마쉬멜로우.02전체 -->
 
                 <div
                     class="option"
-                    data-part="marshmallow.02.all"
                     onclick="selectPart('marshmallow.02.all')"
                 >
 
                     <div class="option-image">
-                        MARSHMALLOW.02ALL
+                        MARSHMALLOW 02 ALL
                     </div>
-
 
                     <div class="option-name">
                         마쉬멜로우.02 전체
                     </div>
 
-
                     <div class="option-price">
-                        +4000원
+                        +4,000원
                     </div>
 
                 </div>
 
-                <!-- 마카롱전체 -->
 
                 <div
                     class="option"
-                    data-part="macaron.all"
                     onclick="selectPart('macaron.all')"
                 >
 
                     <div class="option-image">
-                        MACARONALL
+                        MACARON ALL
                     </div>
-
 
                     <div class="option-name">
-                        마카롱전체
+                        마카롱 전체
                     </div>
 
+                    <div class="option-price">
+                        +3,000원
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="option"
+                    onclick="selectPart('yakgwa.all')"
+                >
+
+                    <div class="option-image">
+                        YAKGWA ALL
+                    </div>
+
+                    <div class="option-name">
+                        약과 전체
+                    </div>
 
                     <div class="option-price">
-                        +800원
+                        +3,000원
                     </div>
 
                 </div>
@@ -1510,9 +1443,164 @@
 
 
 
-        <!-- =========================
-             PRICE
-        ========================= -->
+        <!-- ==================================================
+             ⭐ 축
+             제일 하단 / 리스트 선택 방식
+        ================================================== -->
+
+        <div class="section">
+
+            <div class="section-title">
+                축
+            </div>
+
+
+            <div class="switch-list">
+
+
+                <!-- 청축 -->
+
+                <div
+                    class="switch-item active"
+                    data-switch="blue"
+                    onclick="selectSwitch('blue', this)"
+                >
+
+                    <div class="switch-left">
+
+                        <div class="switch-radio"></div>
+
+                        <div class="switch-name">
+                            청축
+                        </div>
+
+                    </div>
+
+
+                    <div class="switch-price">
+                        0원
+                    </div>
+
+                </div>
+
+
+
+                <!-- 갈축 -->
+
+                <div
+                    class="switch-item"
+                    data-switch="brown"
+                    onclick="selectSwitch('brown', this)"
+                >
+
+                    <div class="switch-left">
+
+                        <div class="switch-radio"></div>
+
+                        <div class="switch-name">
+                            갈축
+                        </div>
+
+                    </div>
+
+
+                    <div class="switch-price">
+                        0원
+                    </div>
+
+                </div>
+
+
+
+                <!-- 강백축 -->
+
+                <div
+                    class="switch-item"
+                    data-switch="gangbaek"
+                    onclick="selectSwitch('gangbaek', this)"
+                >
+
+                    <div class="switch-left">
+
+                        <div class="switch-radio"></div>
+
+                        <div class="switch-name">
+                            강백축
+                        </div>
+
+                    </div>
+
+
+                    <div class="switch-price">
+                        0원
+                    </div>
+
+                </div>
+
+
+
+                <!-- 바다소금축 -->
+
+                <div
+                    class="switch-item"
+                    data-switch="seasalt"
+                    onclick="selectSwitch('seasalt', this)"
+                >
+
+                    <div class="switch-left">
+
+                        <div class="switch-radio"></div>
+
+                        <div class="switch-name">
+                            바다소금축
+                        </div>
+
+                    </div>
+
+
+                    <div class="switch-price">
+                        0원
+                    </div>
+
+                </div>
+
+
+
+                <!-- 딸기라떼축 -->
+
+                <div
+                    class="switch-item"
+                    data-switch="strawberry_latte"
+                    onclick="selectSwitch('strawberry_latte', this)"
+                >
+
+                    <div class="switch-left">
+
+                        <div class="switch-radio"></div>
+
+                        <div class="switch-name">
+                            딸기라떼축
+                        </div>
+
+                    </div>
+
+
+                    <div class="switch-price">
+                        0원
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ==================================================
+             가격
+        ================================================== -->
 
         <div class="section price-box">
 
@@ -1525,6 +1613,19 @@
 
                 <span id="basePrice">
                     15,900원
+                </span>
+
+            </div>
+
+
+            <div class="price-row">
+
+                <span>
+                    축
+                </span>
+
+                <span id="switchPrice">
+                    0원
                 </span>
 
             </div>
@@ -1550,7 +1651,7 @@
                 </span>
 
                 <span id="totalPrice">
-                    15,900원
+                    16,900원
                 </span>
 
             </div>
@@ -1573,9 +1674,9 @@
 
 
 
-<!-- =========================
-     THREE.JS
-========================= -->
+<!-- ====================================================
+     Three.js
+==================================================== -->
 
 <script type="importmap">
 
