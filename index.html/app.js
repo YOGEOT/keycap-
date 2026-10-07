@@ -240,6 +240,12 @@ const PARTS = {
         price: 500
     },
 
+    pretzel: {
+        file: 'pretzel.glb',
+        name: '프레첼',
+        price: 800
+    },
+
     wafle: {
         file: 'wafle.glb',
         name: '와플',
@@ -344,6 +350,8 @@ const ALL_PART_PRICES = {
 
     'macaron.all': 3000,
 
+    'pretzel.all': 3000,
+
     'yakgwa.all': 3000
 
 };
@@ -412,17 +420,17 @@ let selectedSlot =
 
 
 let selectedBaseColor =
-    '#cccccc';
+    '#886363';
 
 
 let selectedKeycapColors = [
 
-    '#cccccc',
-    '#cccccc',
-    '#cccccc',
-    '#cccccc',
-    '#cccccc',
-    '#cccccc'
+    '#886363',
+    '#886363',
+    '#886363',
+    '#886363',
+    '#886363',
+    '#886363'
 
 ];
 
