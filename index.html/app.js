@@ -222,6 +222,30 @@ const PARTS = {
         price: 1000
     },
 
+    wing_R: {
+        file: 'wing_R.glb',
+        name: '날개_R',
+        price: 800
+    },
+
+    wing_L: {
+        file: 'wing_L.glb',
+        name: '날개_L',
+        price: 800
+    },
+
+    wing_R_all: {
+        file: 'wing_R_all.glb',
+        name: '날개_R',
+        price: 1000
+    },
+
+    wing_L_all: {
+        file: 'wing_L_all.glb',
+        name: '날개_L',
+        price: 1000
+    },
+
     'marshmallow.01': {
         file: 'marshmallow.01.glb',
         name: '마쉬멜로우.01',
