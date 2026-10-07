@@ -338,6 +338,10 @@ const ALL_PART_PRICES = {
 
     'chickenegg.all': 1000,
 
+    'chicken.all': 5000,
+
+    'chick.all': 5000,
+
     'peach.all': 1000,
 
     'apple.all': 1000,
