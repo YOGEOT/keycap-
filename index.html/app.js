@@ -294,6 +294,18 @@ const PARTS = {
         price: 1000
     },
 
+    corn: {
+        file: 'corn.glb',
+        name: '콘',
+        price: 1000
+    },
+
+    twister_potato: {
+        file: 'twister_potato.glb',
+        name: '회오리감자',
+        price: 1000
+    },
+
     wafle: {
         file: 'wafle.glb',
         name: '와플',
@@ -411,6 +423,8 @@ const ALL_PART_PRICES = {
     'potato_hotdog.all': 4000,
 
     'hotdog.all': 4000,
+
+    'corn.all': 4000,
 
     'yakgwa.all': 3000
 
