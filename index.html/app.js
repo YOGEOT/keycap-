@@ -282,6 +282,18 @@ const PARTS = {
         price: 1000
     },
 
+    potato_hotdog: {
+        file: 'potato_hotdog.glb',
+        name: '감자핫도그',
+        price: 1000
+    },
+
+    hotdog: {
+        file: 'hotdog.glb',
+        name: '핫도그',
+        price: 1000
+    },
+
     wafle: {
         file: 'wafle.glb',
         name: '와플',
@@ -395,6 +407,10 @@ const ALL_PART_PRICES = {
     'pretzel.all': 4000,
 
     'cookie.all': 4000,
+
+    'potato_hotdog.all': 4000,
+
+    'hotdog.all': 4000,
 
     'yakgwa.all': 3000
 
