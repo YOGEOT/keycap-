@@ -306,6 +306,18 @@ const PARTS = {
         price: 1000
     },
 
+    sodduck: {
+        file: 'sodduck.glb',
+        name: '소떡소떡',
+        price: 1000
+    },
+
+    stick_dduck: {
+        file: 'stick_dduck.glb',
+        name: 'Stick Dduck',
+        price: 1000
+    },
+
     wafle: {
         file: 'wafle.glb',
         name: '와플',
@@ -425,6 +437,12 @@ const ALL_PART_PRICES = {
     'hotdog.all': 4000,
 
     'corn.all': 4000,
+
+    'twister_potato.all': 4000,
+
+    'sodduck.all': 4000,
+
+    'stick_dduck.all': 4000,
 
     'yakgwa.all': 3000
 
