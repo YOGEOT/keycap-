@@ -318,6 +318,12 @@ const PARTS = {
         price: 1000
     },
 
+    dubai: {
+        file: 'dubai.glb',
+        name: 'Dubai',
+        price: 1000
+    },
+
     wafle: {
         file: 'wafle.glb',
         name: '와플',
@@ -421,6 +427,8 @@ const ALL_PART_PRICES = {
     'sibwon.all': 4000,
 
     'lip.all': 3000,
+
+    'dubai.all': 3000,
 
     'marshmallow.01.all': 4000,
 
