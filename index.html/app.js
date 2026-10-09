@@ -314,8 +314,14 @@ const PARTS = {
 
     stick_dduck: {
         file: 'stick_dduck.glb',
-        name: 'Stick Dduck',
+        name: '떡꼬치',
         price: 1000
+    },
+
+    pizza_seolgi: {
+        file: 'pizza_seolgi.glb',
+        name: '피자설기',
+        price: 1200
     },
 
     dubai: {
@@ -451,6 +457,8 @@ const ALL_PART_PRICES = {
     'sodduck.all': 4000,
 
     'stick_dduck.all': 4000,
+
+    'pizza_seolgi.all': 4200,
 
     'yakgwa.all': 3000
 
