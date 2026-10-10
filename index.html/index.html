@@ -49,7 +49,10 @@
             height: 120px;
             background: #f8f8f8;
             border-radius: 10px;
-}
+        }
+
+        
+
 }
 
 
@@ -169,7 +172,8 @@
 
         .slot-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(3, auto);
             gap: 8px;
         }
 
@@ -743,6 +747,14 @@
                     <span>silk</span>
                 </div>
 
+                <div
+                    class="color"
+                    style="background:#c09649"
+                    onclick="changeBaseColor('#c09649', this)"
+                    >
+                    <span>gold</span>
+                </div>
+
 
             </div>
 
@@ -861,6 +873,16 @@
                 </div>
 
 
+                <div
+                    class="color"
+                    data-keycap-color="#c09649"
+                    style="background:#c09649"
+                    onclick="changeKeycapColor('#c09649', this)"
+                    >
+                    <span>gold</span>
+                </div>
+
+
 
             </div>
 
@@ -962,7 +984,16 @@
                 onclick="selectAllKeycapColor('#727272', this)"
                 >
                 <span>silk</span>
-            </div>           
+            </div>
+
+            
+            <div
+                class="color"
+                style="background:#c09649;"
+                onclick="selectAllKeycapColor('#c09649', this)"
+                >
+                <span>gold</span>
+            </div>  
         
     
 
