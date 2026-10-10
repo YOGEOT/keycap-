@@ -2452,6 +2452,8 @@ async function init() {
     );
 
 
+    await renderOptionThumbnails();
+
     updatePrice();
 
 
@@ -2512,5 +2514,233 @@ function animate() {
 
 }
 
+
+/* 파츠 썸네일 방향 설정
+   각도 단위: 도(degree)
+   X: 위아래 기울이기
+   Y: 좌우 회전
+   Z: 옆으로 기울이기
+*/
+
+const THUMBNAIL_ROTATIONS = {
+    chicken: { x: -90, y: 0, z: 0 },
+    chickenegg: { x: -90, y: 0, z: 0 },
+    chick: { x: -90, y: 0, z: 0 },
+       
+
+    // 여기에 다른 파츠도 추가할 수 있습니다.
+};
+
+
+
+/* ============================================================
+   파츠 옵션 카드 GLB 썸네일
+   - PNG 파일 불필요
+   - 기존 메인 뷰어와 별도 렌더링
+   - 하나의 렌더러를 재사용
+============================================================ */
+
+async function renderOptionThumbnails() {
+    // 파츠, 케이스, 키캡 옵션 카드 찾기
+    const cards = document.querySelectorAll(
+        '[data-part], [data-base], [data-model]'
+    );
+
+    if (!cards.length) {
+        console.warn('썸네일 옵션 카드를 찾지 못했습니다.');
+        return;
+    }
+
+    // 썸네일 전용 렌더러
+    const thumbRenderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true,
+        preserveDrawingBuffer: true
+    });
+
+    thumbRenderer.setPixelRatio(1);
+    thumbRenderer.setSize(160, 120);
+    thumbRenderer.outputColorSpace = THREE.SRGBColorSpace;
+    thumbRenderer.setClearColor(0xffffff, 0);
+
+    // 썸네일 밝기 조정
+    thumbRenderer.toneMapping = THREE.ACESFilmicToneMapping;
+    thumbRenderer.toneMappingExposure = 0.8;
+
+    const thumbScene = new THREE.Scene();
+
+    thumbScene.add(
+        new THREE.HemisphereLight(0xffffff, 0x888888, 2)
+    );
+
+    const thumbLight = new THREE.DirectionalLight(0xffffff, 3);
+    thumbLight.position.set(4, 6, 8);
+    thumbScene.add(thumbLight);
+
+    const thumbCamera = new THREE.PerspectiveCamera(
+        35,
+        160 / 120,
+        0.01,
+        1000
+    );
+
+    // GLB 로딩 캐시
+    const modelCache = new Map();
+
+    async function getThumbnailModel(card) {
+    const partName = card.dataset.part;
+
+    // 파츠 썸네일
+    if (partName) {
+        if (
+            partName === 'none' ||
+            partName === 'all-none'
+        ) {
+            return null;
+        }
+
+        // chicken.all → chicken
+        const lookupName = partName.endsWith('.all')
+            ? partName.slice(0, -4)
+            : partName;
+
+        const partInfo = PARTS[lookupName];
+
+        if (!partInfo) {
+            console.warn(
+                'PARTS에 등록되지 않은 파츠:',
+                lookupName
+            );
+            return null;
+        }
+
+        // 원래 파츠와 같은 GLB 파일 사용
+        return await loadCachedModel(
+            lookupName,
+            partInfo.file
+        );
+    }
+
+    // 케이스·타입 썸네일
+    const modelFile = card.dataset.base || card.dataset.model;
+
+    if (!modelFile || modelFile === 'none') {
+        return null;
+    }
+
+    return await loadCachedModel(modelFile, modelFile);
+}
+
+    async function loadCachedModel(cacheKey, fileName) {
+        if (modelCache.has(cacheKey)) {
+            return await modelCache.get(cacheKey);
+        }
+
+        const promise = loadGLB(`./${fileName}`).catch(error => {
+            console.error('썸네일 GLB 로드 실패:', fileName, error);
+            modelCache.delete(cacheKey);
+            return null;
+        });
+
+        modelCache.set(cacheKey, promise);
+        return await promise;
+    }
+
+    // 각 카드에 썸네일 렌더링
+    for (const card of cards) {
+        if (card.querySelector('.part-thumbnail-canvas')) {
+            continue;
+        }
+
+        const model = await getThumbnailModel(card);
+
+        if (!model) {
+            continue;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 160;
+        canvas.height = 120;
+        canvas.className = 'part-thumbnail-canvas';
+        canvas.style.width = '100%';
+        canvas.style.height = '100px';
+        canvas.style.display = 'block';
+
+        card.prepend(canvas);
+
+        // 원본 모델과 분리된 복제본
+        const previewModel = model.clone(true);
+
+        // 파츠 / 케이스 / 키캡별 회전 설정
+        const modelKey =
+            card.dataset.part ||
+            card.dataset.base ||
+            card.dataset.model;
+
+        const rotation = THUMBNAIL_ROTATIONS[modelKey] || {
+            x: 0,
+            y: 0,
+            z: 0
+        };
+
+        previewModel.rotation.set(
+            THREE.MathUtils.degToRad(rotation.x),
+            THREE.MathUtils.degToRad(rotation.y),
+            THREE.MathUtils.degToRad(rotation.z)
+        );
+
+        thumbScene.add(previewModel);
+        previewModel.updateMatrixWorld(true);
+
+        // 모델 크기와 중심 계산
+        const box = new THREE.Box3().setFromObject(previewModel);
+        const size = box.getSize(new THREE.Vector3());
+        const center = box.getCenter(new THREE.Vector3());
+
+        previewModel.position.sub(center);
+        previewModel.updateMatrixWorld(true);
+
+        const maxSize = Math.max(size.x, size.y, size.z);
+
+        if (maxSize > 0) {
+            const distance =
+                (maxSize / (2 * Math.tan(
+                    THREE.MathUtils.degToRad(thumbCamera.fov / 2)
+                ))) * 1.7;
+
+            thumbCamera.position.set(
+                distance * 0.5,
+                distance * 0.5,
+                distance
+            );
+
+            thumbCamera.near = Math.max(0.001, distance / 100);
+            thumbCamera.far = distance * 100;
+            thumbCamera.lookAt(0, 0, 0);
+            thumbCamera.updateProjectionMatrix();
+
+            thumbRenderer.render(thumbScene, thumbCamera);
+
+            const context = canvas.getContext('2d');
+
+            if (context) {
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                context.drawImage(
+                    thumbRenderer.domElement,
+                    0,
+                    0,
+                    canvas.width,
+                    canvas.height
+                );
+            }
+        }
+
+        thumbScene.remove(previewModel);
+    }
+
+    thumbRenderer.dispose();
+
+    console.log('파츠·케이스·키캡 썸네일 렌더링 완료');
+}
 
 animate();

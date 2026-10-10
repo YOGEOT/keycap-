@@ -36,6 +36,23 @@
         }
 
 
+        .part-thumbnail-canvas {
+            width: 100%;
+            height: 100px;
+            display: block;
+            object-fit: contain;
+            margin: 0 auto 6px;
+
+        .model-thumbnail {
+            display: block;
+            width: 100%;
+            height: 120px;
+            background: #f8f8f8;
+            border-radius: 10px;
+}
+}
+
+
         /* ====================================================
            3D
         ==================================================== */
@@ -180,6 +197,31 @@
             border-radius: 8px;
             font-size: 13px;
             color: #666666;
+        }
+
+
+        /* 색상 버튼 내부 텍스트 중앙 정렬 */
+        .color {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .color span {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+
+            margin: 0;
+            padding: 0;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            pointer-events: none;
         }
 
 
@@ -437,26 +479,26 @@
 
             <div class="option-grid">
 
-
-                <div
-                    class="option active"
-                    data-base="case.glb"
-                    onclick="selectBase(this)"
-                >
-
-                    <div class="option-image">
-                        BASIC
-                    </div>
-
-                    <div class="option-name">
-                        베이직
-                    </div>
-
+            
+                <div 
+                    class="option-card" data-base="case.glb"
+                    onclick="selectBase(this)">
+                    <span>베이직</span>
                     <div class="option-price">
-                        15,900원
+                        +15,900원
                     </div>
-
                 </div>
+
+
+                <div 
+                    class="option-card" data-base="case_3botton.glb"
+                    onclick="selectBase(this)">
+                    <span>3구 케이스</span>
+                    <div class="option-price">
+                        +11,900원
+                    </div>
+                </div>
+
 
 
                 <div
@@ -464,11 +506,7 @@
                     data-base="pattern_case.glb"
                     onclick="selectBase(this)"
                 >
-
-                    <div class="option-image">
-                        PATTERN
-                    </div>
-
+                    
                     <div class="option-name">
                         패턴
                     </div>
@@ -478,28 +516,7 @@
                     </div>
 
                 </div>
-
-
-                <div
-                    class="option"
-                    data-base="case_3botton.glb"
-                    onclick="selectBase(this)"
-                >
-
-                    <div class="option-image">
-                        3 KEY
-                    </div>
-
-                    <div class="option-name">
-                        3구 케이스
-                    </div>
-
-                    <div class="option-price">
-                        11,900원
-                    </div>
-
-                </div>
-
+                
 
             </div>
 
@@ -520,57 +537,34 @@
 
             <div class="option-grid">
 
-
-                <div
-                    class="option active"
+              
+                <div 
+                    class="option-card" 
                     data-type="A"
-                    onclick="selectType(this)"
-                >
-
-                    <div class="option-image">
-                        TYPE A
-                    </div>
-
-                    <div class="option-name">
-                        TYPE A
-                    </div>
-
+                    data-model="TypeA.glb"
+                    onclick="selectType(this)">
+                    <span>TYPE A</span>                   
                 </div>
 
 
-                <div
-                    class="option"
+                <div 
+                    class="option-card" 
                     data-type="B"
-                    onclick="selectType(this)"
-                >
-
-                    <div class="option-image">
-                        TYPE B
-                    </div>
-
-                    <div class="option-name">
-                        TYPE B
-                    </div>
-
+                    data-model="TypeB.glb"
+                    onclick="selectType(this)">
+                    <span>TYPE B</span>                   
                 </div>
 
 
-                <div
-                    class="option"
+                <div 
+                    class="option-card" 
                     data-type="C"
-                    onclick="selectType(this)"
-                >
+                    data-model="TypeC.glb"
+                    onclick="selectType(this)">
+                    <span>TYPE C</span>                   
+                </div>                            
 
-                    <div class="option-image">
-                        TYPE C
-                    </div>
-
-                    <div class="option-name">
-                        TYPE C
-                    </div>
-
-                </div>
-
+                
 
             </div>
 
@@ -745,7 +739,9 @@
                     class="color"
                     style="background:#727272"
                     onclick="changeBaseColor('#727272', this)"
-                ></div>
+                    >
+                    <span>silk</span>
+                </div>
 
 
             </div>
@@ -860,7 +856,9 @@
                     data-keycap-color="#727272"
                     style="background:#727272"
                     onclick="changeKeycapColor('#727272', this)"
-                ></div>
+                    >
+                    <span>silk</span>
+                </div>
 
 
 
@@ -962,7 +960,9 @@
                 class="color"
                 style="background:#727272;"
                 onclick="selectAllKeycapColor('#727272', this)"
-            ></div>           
+                >
+                <span>silk</span>
+            </div>           
         
     
 
@@ -1027,607 +1027,278 @@
                 </div>
 
 
-                <div
-                    class="option"
-                    onclick="selectPart('chicken')"
-                >
-
-                    <div class="option-image">
-                        CHICKEN
-                    </div>
-
-                    <div class="option-name">
-                        닭
-                    </div>
-
+                <div class="option-card" data-part="chicken"
+                     onclick="selectPart('chicken')">
+                    <span>닭</span>
                     <div class="option-price">
                         +1,500원
                     </div>
-
                 </div>
 
 
-                <div
-                    class="option"
-                    onclick="selectPart('chickenegg')"
-                >
-
-                    <div class="option-image">
-                        CHICKENEGG
-                    </div>
-
-                    <div class="option-name">
-                        닭알
-                    </div>
-
+                <div class="option-card" data-part="chickenegg"
+                     onclick="selectPart('chickenegg')">
+                    <span>닭알</span>
                     <div class="option-price">
                         +500원
                     </div>
-
                 </div>
+                
 
-
-                <div
-                    class="option"
-                    onclick="selectPart('chick')"
-                >
-
-                    <div class="option-image">
-                        CHICK
-                    </div>
-
-                    <div class="option-name">
-                        병아리
-                    </div>
-
+                <div class="option-card" data-part="chick"
+                     onclick="selectPart('chick')">
+                    <span>병아리</span>
                     <div class="option-price">
                         +1,500원
                     </div>
-
                 </div>
 
 
-
-                <div
-                    class="option"
-                    onclick="selectPart('pepero')"
-                >
-
-                    <div class="option-image">
-                        PEPERO
+                <div class="option-card" data-part="yakgwa"
+                     onclick="selectPart('yakgwa')">
+                    <span>약과</span>
+                    <div class="option-price">
+                        +800원
                     </div>
+                </div>
 
-                    <div class="option-name">
-                        빼빼로
+
+                <div class="option-card" data-part="egg"
+                     onclick="selectPart('egg')">
+                    <span>계란빵</span>
+                    <div class="option-price">
+                        +1,000원
                     </div>
+                </div>
 
+
+                <div class="option-card" data-part="takoyaki"
+                     onclick="selectPart('takoyaki')">
+                    <span>타코야키</span>
+                    <div class="option-price">
+                        +1,000원
+                    </div>
+                </div>
+
+
+                <div class="option-card" data-part="sibwon"
+                     onclick="selectPart('sibwon')">
+                    <span>십원</span>
+                    <div class="option-price">
+                        +1,000원
+                    </div>
+                </div>
+
+
+                <div class="option-card" data-part="wafle"
+                     onclick="selectPart('wafle')">
+                    <span>와플</span>
+                    <div class="option-price">
+                        +1,000원
+                    </div>
+                </div>
+
+
+                <div class="option-card" data-part="hodu"
+                     onclick="selectPart('hodu')">
+                    <span>호두</span>
+                    <div class="option-price">
+                        +1,000원
+                    </div>
+                </div>
+
+
+                <div class="option-card" data-part="peanut"
+                     onclick="selectPart('peanut')">
+                    <span>땅콩</span>
+                    <div class="option-price">
+                        +1,000원
+                    </div>
+                </div>
+
+
+                <div class="option-card" data-part="gukhwa"
+                     onclick="selectPart('gukhwa')">
+                    <span>국화</span>
+                    <div class="option-price">
+                        +1,000원
+                    </div>
+                </div>
+
+
+                <div class="option-card" data-part="dubai"
+                     onclick="selectPart('dubai')">
+                    <span>두바이</span>
+                    <div class="option-price">
+                        +1,000원
+                    </div>
+                </div>
+
+
+                <div class="option-card" data-part="pretzel"
+                     onclick="selectPart('pretzel')">
+                    <span>프레첼</span>
+                    <div class="option-price">
+                        +1,000원
+                    </div>
+                </div>
+
+
+                <div class="option-card" data-part="cookie"
+                     onclick="selectPart('cookie')">
+                    <span>쿠키</span>
+                    <div class="option-price">
+                        +1,000원
+                    </div>
+                </div>
+
+
+                <div class="option-card" data-part="macaron"
+                     onclick="selectPart('macaron')">
+                    <span>마카롱</span>
+                    <div class="option-price">
+                        +1,000원
+                    </div>
+                </div>
+
+
+                <div class="option-card" data-part="pepero"
+                     onclick="selectPart('pepero')">
+                    <span>빼빼로</span>
                     <div class="option-price">
                         +500원
                     </div>
-
                 </div>
 
 
-
-                <div
-                    class="option"
-                    onclick="selectPart('egg')"
-                >
-
-                    <div class="option-image">
-                        EGG
-                    </div>
-
-                    <div class="option-name">
-                        달걀
-                    </div>
-
+                <div class="option-card" data-part="hotdog"
+                     onclick="selectPart('hotdog')">
+                    <span>핫도그</span>
                     <div class="option-price">
                         +1,000원
                     </div>
-
                 </div>
 
 
-                <div
-                    class="option"
-                    onclick="selectPart('takoyaki')"
-                >
-
-                    <div class="option-image">
-                        TAKOYAKI
-                    </div>
-
-                    <div class="option-name">
-                        타코야키
-                    </div>
-
+                <div class="option-card" data-part="potato_hotdog"
+                     onclick="selectPart('potato_hotdog')">
+                    <span>감자핫도그</span>
                     <div class="option-price">
                         +1,000원
                     </div>
-
                 </div>
 
 
-                <div
-                    class="option"
-                    onclick="selectPart('yakgwa')"
-                >
-
-                    <div class="option-image">
-                        YAKGWA
+                <div class="option-card" data-part="stick_dduck"
+                     onclick="selectPart('stick_dduck')">
+                    <span>소떡소떡</span>
+                    <div class="option-price">
+                        +1,000원
                     </div>
+                </div>
 
-                    <div class="option-name">
-                        약과
+
+                <div class="option-card" data-part="sodduck"
+                     onclick="selectPart('sodduck')">
+                    <span>소떡소떡</span>
+                    <div class="option-price">
+                        +1,000원
                     </div>
+                </div>
 
+
+                <div class="option-card" data-part="corn"
+                     onclick="selectPart('corn')">
+                    <span>옥수수</span>
+                    <div class="option-price">
+                        +1,000원
+                    </div>
+                </div>
+
+
+                <div class="option-card" data-part="twister_potato"
+                     onclick="selectPart('twister_potato')">
+                    <span>회오리감자</span>
+                    <div class="option-price">
+                        +1,000원
+                    </div>
+                </div>
+
+
+                <div class="option-card" data-part="peach"
+                     onclick="selectPart('peach')">
+                    <span>복숭아</span>
+                    <div class="option-price">
+                        +1,000원
+                    </div>
+                </div>
+
+
+                <div class="option-card" data-part="apple"
+                     onclick="selectPart('apple')">
+                    <span>사과</span>
+                    <div class="option-price">
+                        +1,000원
+                    </div>
+                </div>
+
+
+                <div class="option-card" data-part="marshmallow.01"
+                     onclick="selectPart('marshmallow.01')">
+                    <span>마쉬멜로우.01</span>
+                    <div class="option-price">
+                        +1,000원
+                    </div>
+                </div>
+
+
+                <div class="option-card" data-part="marshmallow.02"
+                     onclick="selectPart('marshmallow.02')">
+                    <span>마쉬멜로우.02</span>
+                    <div class="option-price">
+                        +1,000원
+                    </div>
+                </div>
+
+
+                <div class="option-card" data-part="lip"
+                     onclick="selectPart('lip')">
+                    <span>립</span>
+                    <div class="option-price">
+                        +1,000원
+                    </div>
+                </div>
+
+
+                <div class="option-card" data-part="wing_R"
+                     onclick="selectPart('wing_R')">
+                    <span>날개_R</span>
                     <div class="option-price">
                         +800원
                     </div>
-
                 </div>
 
 
-                <div
-                    class="option"
-                    onclick="selectPart('dubai')"
-                >
-
-                    <div class="option-image">
-                        DUBAI
-                    </div>
-
-                    <div class="option-name">
-                        두바이
-                    </div>
-
-                    <div class="option-price">
-                        +1000원
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="option"
-                    onclick="selectPart('wafle')"
-                >
-
-                    <div class="option-image">
-                        WAFLE
-                    </div>
-
-                    <div class="option-name">
-                        와플
-                    </div>
-
-                    <div class="option-price">
-                        +1,000원
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="option"
-                    onclick="selectPart('gukhwa')"
-                >
-
-                    <div class="option-image">
-                        GUKHWA
-                    </div>
-
-                    <div class="option-name">
-                        국화
-                    </div>
-
-                    <div class="option-price">
-                        +1,000원
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="option"
-                    onclick="selectPart('sibwon')"
-                >
-
-                    <div class="option-image">
-                        SIBWON
-                    </div>
-
-                    <div class="option-name">
-                        십원
-                    </div>
-
-                    <div class="option-price">
-                        +1,000원
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="option"
-                    onclick="selectPart('peanut')"
-                >
-
-                    <div class="option-image">
-                        PEANUT
-                    </div>
-
-                    <div class="option-name">
-                        피넛
-                    </div>
-
-                    <div class="option-price">
-                        +1,000원
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="option"
-                    onclick="selectPart('hodu')"
-                >
-
-                    <div class="option-image">
-                        HODU
-                    </div>
-
-                    <div class="option-name">
-                        호두
-                    </div>
-
-                    <div class="option-price">
-                        +1,000원
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="option"
-                    onclick="selectPart('potato_hotdog')"
-                >
-
-                    <div class="option-image">
-                        POTATO_HOTDOG
-                    </div>
-
-                    <div class="option-name">
-                        감자핫도그
-                    </div>
-
-                    <div class="option-price">
-                        +1,000원
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="option"
-                    onclick="selectPart('hotdog')"
-                >
-
-                    <div class="option-image">
-                        HOTDOG
-                    </div>
-
-                    <div class="option-name">
-                        핫도그
-                    </div>
-
-                    <div class="option-price">
-                        +1,000원
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="option"
-                    onclick="selectPart('corn')"
-                >
-
-                    <div class="option-image">
-                        CORN
-                    </div>
-
-                    <div class="option-name">
-                        옥수수
-                    </div>
-
-                    <div class="option-price">
-                        +1,000원
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="option"
-                    onclick="selectPart('twister_potato')"
-                >
-
-                    <div class="option-image">
-                        TWISTER_POTATO
-                    </div>
-
-                    <div class="option-name">
-                        회오리감자
-                    </div>
-
-                    <div class="option-price">
-                        +1,000원
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="option"
-                    onclick="selectPart('sodduck')"
-                >
-
-                    <div class="option-image">
-                        SODDUCK
-                    </div>
-
-                    <div class="option-name">
-                        소떡소떡
-                    </div>
-
-                    <div class="option-price">
-                        +1,000원
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="option"
-                    onclick="selectPart('stick_dduck')"
-                >
-
-                    <div class="option-image">
-                        STICK_DDUCK
-                    </div>
-
-                    <div class="option-name">
-                        떡꼬치
-                    </div>
-
-                    <div class="option-price">
-                        +1,000원
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="option"
-                    onclick="selectPart('peach')"
-                >
-
-                    <div class="option-image">
-                        PEACH
-                    </div>
-
-                    <div class="option-name">
-                        복숭아
-                    </div>
-
-                    <div class="option-price">
-                        +1,000원
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="option"
-                    onclick="selectPart('apple')"
-                >
-
-                    <div class="option-image">
-                        APPLE
-                    </div>
-
-                    <div class="option-name">
-                        사과
-                    </div>
-
-                    <div class="option-price">
-                        +1,000원
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="option"
-                    onclick="selectPart('wing_R')"
-                >
-
-                    <div class="option-image">
-                        WING_R
-                    </div>
-
-                    <div class="option-name">
-                        날개_R
-                    </div>
-
+                <div class="option-card" data-part="wing_L"
+                     onclick="selectPart('wing_L')">
+                    <span>날개_L</span>
                     <div class="option-price">
                         +800원
                     </div>
-
                 </div>
 
 
-                <div
-                    class="option"
-                    onclick="selectPart('wing_L')"
-                >
-
-                    <div class="option-image">
-                        WING_L
-                    </div>
-
-                    <div class="option-name">
-                        날개_L
-                    </div>
-
-                    <div class="option-price">
-                        +800원
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="option"
-                    onclick="selectPart('marshmallow.01')"
-                >
-
-                    <div class="option-image">
-                        MARSHMALLOW 01
-                    </div>
-
-                    <div class="option-name">
-                        마쉬멜로우.01
-                    </div>
-
-                    <div class="option-price">
-                        +1,000원
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="option"
-                    onclick="selectPart('marshmallow.02')"
-                >
-
-                    <div class="option-image">
-                        MARSHMALLOW 02
-                    </div>
-
-                    <div class="option-name">
-                        마쉬멜로우.02
-                    </div>
-
-                    <div class="option-price">
-                        +1,000원
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="option"
-                    onclick="selectPart('macaron')"
-                >
-
-                    <div class="option-image">
-                        MACARON
-                    </div>
-
-                    <div class="option-name">
-                        마카롱
-                    </div>
-
-                    <div class="option-price">
-                        +1,000원
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="option"
-                    onclick="selectPart('pretzel')"
-                >
-
-                    <div class="option-image">
-                        PRETZEL
-                    </div>
-
-                    <div class="option-name">
-                        프레첼
-                    </div>
-
-                    <div class="option-price">
-                        +1000원
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="option"
-                    onclick="selectPart('cookie')"
-                >
-
-                    <div class="option-image">
-                        COOKIE
-                    </div>
-
-                    <div class="option-name">
-                        쿠키
-                    </div>
-
-                    <div class="option-price">
-                        +1000원
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="option"
-                    onclick="selectPart('lip')"
-                >
-
-                    <div class="option-image">
-                        LIP
-                    </div>
-
-                    <div class="option-name">
-                        입술
-                    </div>
-
-                    <div class="option-price">
-                        +1,000원
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="option"
-                    onclick="selectPart('pizza_seolgi')"
-                >
-
-                    <div class="option-image">
-                        PIZZA_SEOLGI
-                    </div>
-
-                    <div class="option-name">
-                        피자설기
-                    </div>
-
+                <div class="option-card" data-part="pizza_seolgi"
+                     onclick="selectPart('pizza_seolgi')">
+                    <span>피자설기</span>
                     <div class="option-price">
                         +1,200원
                     </div>
-
                 </div>
 
+   
+
+               
 
                 <!-- 전체 배치 -->
 
@@ -1650,6 +1321,8 @@
                     </div>
 
                 </div>
+                
+                
                 
                 
                 <div
@@ -1782,7 +1455,7 @@
                     </div>
 
                     <div class="option-name">
-                        달걀 전체
+                        계란빵 전체
                     </div>
 
                     <div class="option-price">
