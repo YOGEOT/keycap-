@@ -614,7 +614,7 @@ function loadGLB(path) {
 
             loader.load(
 
-                path,
+                `${path}${cacheBuster}`,
 
                 gltf => {
 
@@ -1981,35 +1981,77 @@ function moveSwitchToSlot(
 // 선택 축 전체 KEY에 배치
 // ============================================================
 
-async function loadSwitchToAllSlots(switchName) {
-    const switchInfo = SWITCH_OPTIONS[switchName];
-    if (!switchInfo) return;
+async function loadSwitchToAllSlots(
+    switchName
+) {
+
+    const switchInfo =
+        SWITCH_OPTIONS[
+            switchName
+        ];
+
+
+    if (!switchInfo)
+        return;
+
 
     removeSwitches();
 
-    try {
-        const template = await loadGLB(`./${switchInfo.file}`);
 
-        for (let i = 0; i < 6; i++) {
-            if (
-                isThreeKeyCase() &&
-                (i === 1 || i === 3 || i === 5)
-            ) {
-                continue;
-            }
+    for (
+        let i = 0;
+        i < 6;
+        i++
+    ) {
 
-            const model = template.clone(true);
+        if (
+            isThreeKeyCase() &&
+            (
+                i === 1 ||
+                i === 3 ||
+                i === 5
+            )
+        ) {
 
-            productGroup.add(model);
-            moveSwitchToSlot(model, i);
-            switchModels[i] = model;
+            continue;
+
         }
 
-        updateThreeKeyCaseVisibility();
-    } catch (error) {
-        console.error(`${switchInfo.name} 로드 실패:`, error);
-    }
 
+        try {
+
+            const model =
+                await loadGLB(
+                    `./${switchInfo.file}`
+                );
+
+
+            productGroup.add(
+                model
+            );
+
+
+            moveSwitchToSlot(
+                model,
+                i
+            );
+
+
+            switchModels[i] =
+                model;
+
+        }
+
+        catch (error) {
+
+            console.error(
+                `${switchInfo.name} 로드 실패:`,
+                error
+            );
+
+        }
+
+    }
 
 
     updateThreeKeyCaseVisibility();
@@ -2394,15 +2436,31 @@ function() {
 // ============================================================
 
 async function init() {
-    // 썸네일 렌더링을 먼저 시작
-    renderOptionThumbnails();
 
-    await loadBase('case.glb');
-    await loadCaps('A');
+    await loadBase(
+        'case.glb'
+    );
+
+
+    await loadCaps(
+        'A'
+    );
+
+
+    await loadSwitchToAllSlots(
+        selectedSwitch
+    );
+
+
+    await renderOptionThumbnails();
 
     updatePrice();
+
+
     fitCameraToProduct();
+
 }
+
 
 init();
 
@@ -2477,24 +2535,143 @@ const THUMBNAIL_ROTATIONS = {
 
 
 /* ============================================================
-   옵션 썸네일 렌더링 - 초기 화면 표시 우선
-   - 페이지 표시 후 썸네일 작업 시작
-   - 카드 하나씩 처리하고 화면에 제어권 양보
-   - 이미지 썸네일이 있는 카드는 GLB 렌더링 생략
-   - 동일 모델은 캐시 사용
+   파츠 옵션 카드 GLB 썸네일
+   - 첫 생성 후 PNG를 IndexedDB에 저장
+   - 재방문 시 저장된 PNG를 재사용
+   - 캐시가 없는 모델만 GLB 렌더링
+   - 메인 뷰어와 별도 렌더러 사용
 ============================================================ */
 
-function renderOptionThumbnails() {
-    // 중복 실행 방지
-    if (window.__optionThumbnailsStarted) return;
-    window.__optionThumbnailsStarted = true;
+const THUMBNAIL_CACHE_VERSION = 'thumb-v1';
+const THUMBNAIL_DB_NAME = 'FOMORA_ThumbnailDB';
+const THUMBNAIL_STORE_NAME = 'thumbnails';
 
-    // 초기 화면이 먼저 그려진 다음 작업 시작
-    requestAnimationFrame(() => {
-        setTimeout(() => {
-            runThumbnailRendering();
-        }, 0);
+let thumbnailDBPromise = null;
+
+function openThumbnailDB() {
+    if (thumbnailDBPromise) {
+        return thumbnailDBPromise;
+    }
+
+    thumbnailDBPromise = new Promise((resolve, reject) => {
+        if (!('indexedDB' in window)) {
+            reject(new Error('IndexedDB를 지원하지 않습니다.'));
+            return;
+        }
+
+        const request = indexedDB.open(THUMBNAIL_DB_NAME, 1);
+
+        request.onupgradeneeded = () => {
+            const db = request.result;
+
+            if (!db.objectStoreNames.contains(THUMBNAIL_STORE_NAME)) {
+                db.createObjectStore(THUMBNAIL_STORE_NAME);
+            }
+        };
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
     });
+
+    return thumbnailDBPromise;
+}
+
+async function getSavedThumbnail(key) {
+    const db = await openThumbnailDB();
+
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(
+            THUMBNAIL_STORE_NAME,
+            'readonly'
+        );
+
+        const request = transaction
+            .objectStore(THUMBNAIL_STORE_NAME)
+            .get(key);
+
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+async function saveThumbnail(key, dataURL) {
+    const db = await openThumbnailDB();
+
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(
+            THUMBNAIL_STORE_NAME,
+            'readwrite'
+        );
+
+        transaction
+            .objectStore(THUMBNAIL_STORE_NAME)
+            .put(dataURL, key);
+
+        transaction.oncomplete = () => resolve();
+        transaction.onerror = () => reject(transaction.error);
+        transaction.onabort = () => reject(transaction.error);
+    });
+}
+
+function getThumbnailCacheKey(card, fileName) {
+    const modelKey =
+        card.dataset.part ||
+        card.dataset.base ||
+        card.dataset.model ||
+        fileName;
+
+    const rotation = THUMBNAIL_ROTATIONS[modelKey] || {
+        x: 0,
+        y: 0,
+        z: 0
+    };
+
+    return [
+        THUMBNAIL_CACHE_VERSION,
+        fileName,
+        `${rotation.x},${rotation.y},${rotation.z}`,
+        '160x120'
+    ].join('|');
+}
+
+function showSavedThumbnail(card, dataURL) {
+    // 기존 썸네일 요소가 있으면 중복 표시하지 않음
+    if (
+        card.querySelector(
+            '.part-thumbnail-image, .part-thumbnail-canvas'
+        )
+    ) {
+        return;
+    }
+
+    const img = document.createElement('img');
+
+    img.className = 'part-thumbnail-image';
+    img.src = dataURL;
+    img.alt = '';
+    img.width = 160;
+    img.height = 120;
+    img.style.width = '100%';
+    img.style.height = '100px';
+    img.style.display = 'block';
+    img.style.objectFit = 'contain';
+
+    card.prepend(img);
+}
+
+async function renderOptionThumbnails() {
+    // 중복 실행 방지
+    if (window.__thumbnailRenderingPromise) {
+        return window.__thumbnailRenderingPromise;
+    }
+
+    window.__thumbnailRenderingPromise = runThumbnailRendering();
+
+    try {
+        await window.__thumbnailRenderingPromise;
+    } finally {
+        window.__thumbnailRenderingPromise = null;
+    }
 }
 
 async function runThumbnailRendering() {
@@ -2507,10 +2684,91 @@ async function runThumbnailRendering() {
         return;
     }
 
+    // 먼저 저장된 PNG를 확인합니다.
+    // 캐시가 있는 카드는 GLB를 불러오지 않습니다.
+    const uncachedCards = [];
+
+    let cacheAvailable = true;
+
+    for (const card of cards) {
+        if (
+            card.querySelector(
+                '.part-thumbnail-image, .part-thumbnail-canvas'
+            )
+        ) {
+            continue;
+        }
+
+        const partName = card.dataset.part;
+
+        if (
+            partName === 'none' ||
+            partName === 'all-none'
+        ) {
+            continue;
+        }
+
+        let fileName;
+
+        if (partName) {
+            const lookupName = partName.endsWith('.all')
+                ? partName.slice(0, -4)
+                : partName;
+
+            const partInfo = PARTS[lookupName];
+
+            if (!partInfo) {
+                console.warn(
+                    'PARTS에 등록되지 않은 파츠:',
+                    lookupName
+                );
+                continue;
+            }
+
+            fileName = partInfo.file;
+        } else {
+            fileName = card.dataset.base || card.dataset.model;
+
+            if (!fileName || fileName === 'none') {
+                continue;
+            }
+        }
+
+        let cacheKey = getThumbnailCacheKey(card, fileName);
+
+        try {
+            const savedImage = await getSavedThumbnail(cacheKey);
+
+            if (savedImage) {
+                showSavedThumbnail(card, savedImage);
+                continue;
+            }
+        } catch (error) {
+            // IndexedDB 사용이 불가능해도 썸네일 생성은 계속합니다.
+            cacheAvailable = false;
+            console.warn('썸네일 캐시 읽기 실패:', error);
+        }
+
+        uncachedCards.push({
+            card,
+            fileName,
+            cacheKey
+        });
+    }
+
+    if (uncachedCards.length === 0) {
+        console.log('저장된 썸네일을 모두 사용했습니다.');
+        return;
+    }
+
+    console.log(
+        `새 썸네일 생성: ${uncachedCards.length}개`
+    );
+
     const thumbRenderer = new THREE.WebGLRenderer({
-        antialias: false,
+        antialias: true,
         alpha: true,
-        preserveDrawingBuffer: false
+        preserveDrawingBuffer: true
     });
 
     thumbRenderer.setPixelRatio(1);
@@ -2531,120 +2789,67 @@ async function runThumbnailRendering() {
     thumbScene.add(thumbLight);
 
     const thumbCamera = new THREE.PerspectiveCamera(
-        35, 160 / 120, 0.01, 1000
+        35,
+        160 / 120,
+        0.01,
+        1000
     );
 
-    // 모델 로딩 캐시
+    // 동일 GLB는 한 번만 불러옵니다.
     const modelCache = new Map();
 
-    async function loadCachedModel(cacheKey, fileName) {
-        if (!modelCache.has(cacheKey)) {
-            const promise = loadGLB(`./${fileName}`).catch(error => {
-                console.error(
-                    '썸네일 GLB 로드 실패:',
-                    fileName,
-                    error
-                );
-                modelCache.delete(cacheKey);
-                return null;
-            });
-
-            modelCache.set(cacheKey, promise);
+    async function loadCachedModel(fileName) {
+        if (modelCache.has(fileName)) {
+            return modelCache.get(fileName);
         }
 
-        return await modelCache.get(cacheKey);
-    }
-
-    async function getThumbnailModel(card) {
-        const partName = card.dataset.part;
-
-        if (partName) {
-            if (
-                partName === 'none' ||
-                partName === 'all-none'
-            ) {
-                return null;
-            }
-
-            const lookupName = partName.endsWith('.all')
-                ? partName.slice(0, -4)
-                : partName;
-
-            const partInfo = PARTS[lookupName];
-
-            if (!partInfo) {
-                console.warn(
-                    'PARTS에 등록되지 않은 파츠:',
-                    lookupName
-                );
-                return null;
-            }
-
-            return await loadCachedModel(
-                lookupName,
-                partInfo.file
+        const promise = loadGLB(`./${fileName}`).catch(error => {
+            console.error(
+                '썸네일 GLB 로드 실패:',
+                fileName,
+                error
             );
-        }
 
-        const modelFile = card.dataset.base || card.dataset.model;
-
-        if (!modelFile || modelFile === 'none') {
+            modelCache.delete(fileName);
             return null;
-        }
-
-        return await loadCachedModel(modelFile, modelFile);
-    }
-
-    // 각 카드 사이에 브라우저가 화면을 갱신할 시간 제공
-    function nextFrame() {
-        return new Promise(resolve => {
-            requestAnimationFrame(resolve);
         });
+
+        modelCache.set(fileName, promise);
+
+        return promise;
     }
 
     try {
-        for (const card of cards) {
-            // 이미 정지 이미지가 있으면 GLB 렌더링 생략
+        for (const item of uncachedCards) {
+            const { card, fileName, cacheKey } = item;
+
             if (
-                card.dataset.thumb ||
-                card.querySelector('img.option-thumb')
+                card.querySelector(
+                    '.part-thumbnail-image, .part-thumbnail-canvas'
+                )
             ) {
                 continue;
             }
 
-            if (card.querySelector('.part-thumbnail-canvas')) {
-                continue;
-            }
-
-            // 모델 로딩 대기
-            const model = await getThumbnailModel(card);
+            const model = await loadCachedModel(fileName);
 
             if (!model) {
                 continue;
             }
-
-            // 카드별 캔버스
-            const canvas = document.createElement('canvas');
-            canvas.width = 160;
-            canvas.height = 120;
-            canvas.className = 'part-thumbnail-canvas';
-            canvas.style.width = '100%';
-            canvas.style.height = '100px';
-            canvas.style.display = 'block';
-
-            card.prepend(canvas);
 
             const previewModel = model.clone(true);
 
             const modelKey =
                 card.dataset.part ||
                 card.dataset.base ||
-                card.dataset.model;
+                card.dataset.model ||
+                fileName;
 
-            const rotation =
-                THUMBNAIL_ROTATIONS[modelKey] || {
-                    x: 0, y: 0, z: 0
-                };
+            const rotation = THUMBNAIL_ROTATIONS[modelKey] || {
+                x: 0,
+                y: 0,
+                z: 0
+            };
 
             previewModel.rotation.set(
                 THREE.MathUtils.degToRad(rotation.x),
@@ -2687,26 +2892,42 @@ async function runThumbnailRendering() {
 
                 thumbRenderer.render(thumbScene, thumbCamera);
 
-                const context = canvas.getContext('2d');
+                // 캔버스를 PNG 데이터로 변환합니다.
+                const dataURL =
+                    thumbRenderer.domElement.toDataURL('image/png');
 
-                if (context) {
-                    context.drawImage(
-                        thumbRenderer.domElement,
-                        0, 0, canvas.width, canvas.height
-                    );
+                // 화면에는 PNG 이미지를 표시합니다.
+                showSavedThumbnail(card, dataURL);
+
+                // PNG를 브라우저 저장소에 보관합니다.
+                if (cacheAvailable) {
+                    try {
+                        await saveThumbnail(cacheKey, dataURL);
+                    } catch (error) {
+                        console.warn(
+                            '썸네일 캐시 저장 실패:',
+                            fileName,
+                            error
+                        );
+                    }
                 }
             }
 
             thumbScene.remove(previewModel);
 
-            // 다음 카드로 넘어가기 전에 화면 갱신
-            await nextFrame();
+            // 모바일에서 작업이 한꺼번에 몰리지 않도록 잠시 양보
+            await new Promise(resolve => requestAnimationFrame(resolve));
         }
-    } catch (error) {
-        console.error('썸네일 렌더링 중 오류:', error);
     } finally {
         thumbRenderer.dispose();
-        console.log('옵션 썸네일 렌더링 작업 종료');
+
+        for (const modelPromise of modelCache.values()) {
+            // 로딩 중인 모델도 정상적으로 완료되도록 기다리지 않고
+            // 추가 작업만 정리합니다.
+            modelPromise.catch(() => {});
+        }
+
+        console.log('썸네일 처리 완료');
     }
 }
 
