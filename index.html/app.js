@@ -362,7 +362,7 @@ const PARTS = {
 
     fried_egg: {
         file: 'fried_egg.glb',
-        name: '게란후라이',
+        name: '계란후라이',
         price: 1000
     },
 
@@ -376,6 +376,12 @@ const PARTS = {
         file: 'narutomaki.glb',
         name: '나루토마키',
         price: 800
+    },
+
+    ramen: {
+        file: 'ramen.glb',
+        name: '컵라면',
+        price: 1000
     },
 
     wafle: {
@@ -488,9 +494,9 @@ const ALL_PART_PRICES = {
 
     'marshmallow.02.all': 4000,
 
-    'macaroon_P.all': 3000,
+    'macaroon_P.all': 4000,
 
-    'macaroon_B.all': 3000,
+    'macaroon_B.all': 4000,
 
     'pretzel.all': 4000,
 
@@ -510,19 +516,23 @@ const ALL_PART_PRICES = {
 
     'pizza_seolgi.all': 4200,
 
-    'BOk.all': 3000,
+    'tri_gimbap.all': 4000,
+
+    'BOk.all': 4000,
     
-    'hangwa.all': 3000,
+    'hangwa.all': 4000,
 
-    'color_jeon.all': 3000,
+    'color_jeon.all': 4000,
 
-    'fried_egg.all': 3000,
+    'fried_egg.all': 4000,
 
-    'dimsum.all': 3000,
+    'dimsum.all': 4000,
 
     'narutomaki.all': 2000,
 
-    'yakgwa.all': 3000
+    'ramen.all': 4000,
+
+    'yakgwa.all': 4000
 
 };
 
