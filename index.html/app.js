@@ -258,9 +258,15 @@ const PARTS = {
         price: 1000
     },
 
-    macaron: {
-        file: 'macaron.glb',
-        name: '마카롱',
+    macaroon_P: {
+        file: 'macaroon_P.glb',
+        name: '마카롱P',
+        price: 1000
+    },
+
+    macaroon_B: {
+        file: 'macaroon_B.glb',
+        name: '마카롱B',
         price: 1000
     },
 
@@ -327,6 +333,24 @@ const PARTS = {
     dubai: {
         file: 'dubai.glb',
         name: 'Dubai',
+        price: 1000
+    },
+
+    tri_gimbap: {
+        file: 'tri_gimbap.glb',
+        name: 'tri_gimbap',
+        price: 1000
+    },
+
+    Bok: {
+        file: 'Bok.glb',
+        name: 'Bok',
+        price: 1000
+    },
+
+    hangwa: {
+        file: 'hangwa.glb',
+        name: 'hangwa',
         price: 1000
     },
 
@@ -440,7 +464,9 @@ const ALL_PART_PRICES = {
 
     'marshmallow.02.all': 4000,
 
-    'macaron.all': 3000,
+    'macaroon_P.all': 3000,
+
+    'macaroon_B.all': 3000,
 
     'pretzel.all': 4000,
 
@@ -459,6 +485,10 @@ const ALL_PART_PRICES = {
     'stick_dduck.all': 4000,
 
     'pizza_seolgi.all': 4200,
+
+    'BOk.all': 3000,
+    
+    'hangwa.all': 3000,
 
     'yakgwa.all': 3000
 
