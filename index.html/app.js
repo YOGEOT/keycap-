@@ -2931,4 +2931,64 @@ async function runThumbnailRendering() {
     }
 }
 
+/* ============================================================
+   썸네일 자동 시작 감지
+   - 스크롤 여부와 관계없이 실행
+   - 옵션 카드가 나중에 생성되어도 감지
+============================================================ */
+
+let thumbnailStartRequested = false;
+
+function startThumbnailRendering() {
+    if (thumbnailStartRequested) return;
+
+    const cards = document.querySelector(
+        '[data-part], [data-base], [data-model]'
+    );
+
+    if (!cards) return;
+
+    thumbnailStartRequested = true;
+
+    // 화면에 보일 때까지 기다리지 않고 바로 시작
+    renderOptionThumbnails().catch(error => {
+        console.error('썸네일 생성 오류:', error);
+        thumbnailStartRequested = false;
+    });
+}
+
+function observeThumbnailCards() {
+    // 이미 옵션 카드가 존재하면 즉시 시작
+    startThumbnailRendering();
+
+    // 옵션 카드가 나중에 추가되는 경우도 감지
+    const observer = new MutationObserver(() => {
+        if (thumbnailStartRequested) {
+            observer.disconnect();
+            return;
+        }
+
+        startThumbnailRendering();
+
+        if (thumbnailStartRequested) {
+            observer.disconnect();
+        }
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener(
+        'DOMContentLoaded',
+        observeThumbnailCards,
+        { once: true }
+    );
+} else {
+    observeThumbnailCards();
+}
+
 animate();
