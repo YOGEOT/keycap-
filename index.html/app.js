@@ -332,25 +332,31 @@ const PARTS = {
 
     dubai: {
         file: 'dubai.glb',
-        name: 'Dubai',
+        name: '두쫀쿠',
         price: 1000
     },
 
     tri_gimbap: {
         file: 'tri_gimbap.glb',
-        name: 'tri_gimbap',
+        name: '삼각김밥',
         price: 1000
     },
 
     Bok: {
         file: 'Bok.glb',
-        name: 'Bok',
+        name: '복',
         price: 1000
     },
 
     hangwa: {
         file: 'hangwa.glb',
-        name: 'hangwa',
+        name: '한과',
+        price: 1000
+    },
+
+    color_jeon: {
+        file: 'color_jeon.glb',
+        name: '꼬치전',
         price: 1000
     },
 
@@ -489,6 +495,8 @@ const ALL_PART_PRICES = {
     'BOk.all': 3000,
     
     'hangwa.all': 3000,
+
+    'color_jeon.all': 3000,
 
     'yakgwa.all': 3000
 
