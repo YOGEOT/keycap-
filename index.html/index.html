@@ -54,13 +54,30 @@
             border-radius: 10px;
         }
 
-        /* 썸네일이 들어 있는 카드에 클릭 모션만 적용 */
-        [data-part]:active,
-        [data-base]:active,
-        [data-model]:active {
-        transform: scale(0.9);
-        transition: transform 0.12s ease;
-        }
+        
+/* PC 및 모바일: 옵션카드 클릭·터치 모션 */
+[data-part],
+[data-base],
+[data-model] {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+[data-part]:active,
+[data-base]:active,
+[data-model]:active {
+    transform: scale(0.95);
+    transition: transform 0.12s ease;
+}
+
+/* 터치 기기에서 눌렀을 때 모션 유지 */
+@media (hover: none) and (pointer: coarse) {
+    [data-part]:active,
+    [data-base]:active,
+    [data-model]:active {
+        transform: scale(0.95);
+    }
+}
 
         
         
