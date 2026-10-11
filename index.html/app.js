@@ -360,6 +360,24 @@ const PARTS = {
         price: 1000
     },
 
+    fried_egg: {
+        file: 'fried_egg.glb',
+        name: '게란후라이',
+        price: 1000
+    },
+
+    dimsum: {
+        file: 'dimsum.glb',
+        name: '딤섬',
+        price: 1000
+    },
+
+    narutomaki: {
+        file: 'narutomaki.glb',
+        name: '나루토마키',
+        price: 800
+    },
+
     wafle: {
         file: 'wafle.glb',
         name: '와플',
@@ -497,6 +515,12 @@ const ALL_PART_PRICES = {
     'hangwa.all': 3000,
 
     'color_jeon.all': 3000,
+
+    'fried_egg.all': 3000,
+
+    'dimsum.all': 3000,
+
+    'narutomaki.all': 2000,
 
     'yakgwa.all': 3000
 
