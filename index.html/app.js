@@ -614,7 +614,7 @@ function loadGLB(path) {
 
             loader.load(
 
-                `${path}${cacheBuster}`,
+                path,
 
                 gltf => {
 
@@ -1981,77 +1981,35 @@ function moveSwitchToSlot(
 // 선택 축 전체 KEY에 배치
 // ============================================================
 
-async function loadSwitchToAllSlots(
-    switchName
-) {
-
-    const switchInfo =
-        SWITCH_OPTIONS[
-            switchName
-        ];
-
-
-    if (!switchInfo)
-        return;
-
+async function loadSwitchToAllSlots(switchName) {
+    const switchInfo = SWITCH_OPTIONS[switchName];
+    if (!switchInfo) return;
 
     removeSwitches();
 
+    try {
+        const template = await loadGLB(`./${switchInfo.file}`);
 
-    for (
-        let i = 0;
-        i < 6;
-        i++
-    ) {
+        for (let i = 0; i < 6; i++) {
+            if (
+                isThreeKeyCase() &&
+                (i === 1 || i === 3 || i === 5)
+            ) {
+                continue;
+            }
 
-        if (
-            isThreeKeyCase() &&
-            (
-                i === 1 ||
-                i === 3 ||
-                i === 5
-            )
-        ) {
+            const model = template.clone(true);
 
-            continue;
-
+            productGroup.add(model);
+            moveSwitchToSlot(model, i);
+            switchModels[i] = model;
         }
 
-
-        try {
-
-            const model =
-                await loadGLB(
-                    `./${switchInfo.file}`
-                );
-
-
-            productGroup.add(
-                model
-            );
-
-
-            moveSwitchToSlot(
-                model,
-                i
-            );
-
-
-            switchModels[i] =
-                model;
-
-        }
-
-        catch (error) {
-
-            console.error(
-                `${switchInfo.name} 로드 실패:`,
-                error
-            );
-
-        }
-
+        updateThreeKeyCaseVisibility();
+    } catch (error) {
+        console.error(`${switchInfo.name} 로드 실패:`, error);
     }
+
 
 
     updateThreeKeyCaseVisibility();
@@ -2436,31 +2394,15 @@ function() {
 // ============================================================
 
 async function init() {
+    // 썸네일 렌더링을 먼저 시작
+    renderOptionThumbnails();
 
-    await loadBase(
-        'case.glb'
-    );
-
-
-    await loadCaps(
-        'A'
-    );
-
-
-    await loadSwitchToAllSlots(
-        selectedSwitch
-    );
-
-
-    await renderOptionThumbnails();
+    await loadBase('case.glb');
+    await loadCaps('A');
 
     updatePrice();
-
-
     fitCameraToProduct();
-
 }
-
 
 init();
 
@@ -2533,15 +2475,29 @@ const THUMBNAIL_ROTATIONS = {
 
 
 
+
 /* ============================================================
-   파츠 옵션 카드 GLB 썸네일
-   - PNG 파일 불필요
-   - 기존 메인 뷰어와 별도 렌더링
-   - 하나의 렌더러를 재사용
+   옵션 썸네일 렌더링 - 초기 화면 표시 우선
+   - 페이지 표시 후 썸네일 작업 시작
+   - 카드 하나씩 처리하고 화면에 제어권 양보
+   - 이미지 썸네일이 있는 카드는 GLB 렌더링 생략
+   - 동일 모델은 캐시 사용
 ============================================================ */
 
-async function renderOptionThumbnails() {
-    // 파츠, 케이스, 키캡 옵션 카드 찾기
+function renderOptionThumbnails() {
+    // 중복 실행 방지
+    if (window.__optionThumbnailsStarted) return;
+    window.__optionThumbnailsStarted = true;
+
+    // 초기 화면이 먼저 그려진 다음 작업 시작
+    requestAnimationFrame(() => {
+        setTimeout(() => {
+            runThumbnailRendering();
+        }, 0);
+    });
+}
+
+async function runThumbnailRendering() {
     const cards = document.querySelectorAll(
         '[data-part], [data-base], [data-model]'
     );
@@ -2551,19 +2507,16 @@ async function renderOptionThumbnails() {
         return;
     }
 
-    // 썸네일 전용 렌더러
     const thumbRenderer = new THREE.WebGLRenderer({
-        antialias: true,
+        antialias: false,
         alpha: true,
-        preserveDrawingBuffer: true
+        preserveDrawingBuffer: false
     });
 
     thumbRenderer.setPixelRatio(1);
     thumbRenderer.setSize(160, 120);
     thumbRenderer.outputColorSpace = THREE.SRGBColorSpace;
     thumbRenderer.setClearColor(0xffffff, 0);
-
-    // 썸네일 밝기 조정
     thumbRenderer.toneMapping = THREE.ACESFilmicToneMapping;
     thumbRenderer.toneMappingExposure = 0.8;
 
@@ -2578,174 +2531,183 @@ async function renderOptionThumbnails() {
     thumbScene.add(thumbLight);
 
     const thumbCamera = new THREE.PerspectiveCamera(
-        35,
-        160 / 120,
-        0.01,
-        1000
+        35, 160 / 120, 0.01, 1000
     );
 
-    // GLB 로딩 캐시
+    // 모델 로딩 캐시
     const modelCache = new Map();
 
-    async function getThumbnailModel(card) {
-    const partName = card.dataset.part;
-
-    // 파츠 썸네일
-    if (partName) {
-        if (
-            partName === 'none' ||
-            partName === 'all-none'
-        ) {
-            return null;
-        }
-
-        // chicken.all → chicken
-        const lookupName = partName.endsWith('.all')
-            ? partName.slice(0, -4)
-            : partName;
-
-        const partInfo = PARTS[lookupName];
-
-        if (!partInfo) {
-            console.warn(
-                'PARTS에 등록되지 않은 파츠:',
-                lookupName
-            );
-            return null;
-        }
-
-        // 원래 파츠와 같은 GLB 파일 사용
-        return await loadCachedModel(
-            lookupName,
-            partInfo.file
-        );
-    }
-
-    // 케이스·타입 썸네일
-    const modelFile = card.dataset.base || card.dataset.model;
-
-    if (!modelFile || modelFile === 'none') {
-        return null;
-    }
-
-    return await loadCachedModel(modelFile, modelFile);
-}
-
     async function loadCachedModel(cacheKey, fileName) {
-        if (modelCache.has(cacheKey)) {
-            return await modelCache.get(cacheKey);
+        if (!modelCache.has(cacheKey)) {
+            const promise = loadGLB(`./${fileName}`).catch(error => {
+                console.error(
+                    '썸네일 GLB 로드 실패:',
+                    fileName,
+                    error
+                );
+                modelCache.delete(cacheKey);
+                return null;
+            });
+
+            modelCache.set(cacheKey, promise);
         }
 
-        const promise = loadGLB(`./${fileName}`).catch(error => {
-            console.error('썸네일 GLB 로드 실패:', fileName, error);
-            modelCache.delete(cacheKey);
+        return await modelCache.get(cacheKey);
+    }
+
+    async function getThumbnailModel(card) {
+        const partName = card.dataset.part;
+
+        if (partName) {
+            if (
+                partName === 'none' ||
+                partName === 'all-none'
+            ) {
+                return null;
+            }
+
+            const lookupName = partName.endsWith('.all')
+                ? partName.slice(0, -4)
+                : partName;
+
+            const partInfo = PARTS[lookupName];
+
+            if (!partInfo) {
+                console.warn(
+                    'PARTS에 등록되지 않은 파츠:',
+                    lookupName
+                );
+                return null;
+            }
+
+            return await loadCachedModel(
+                lookupName,
+                partInfo.file
+            );
+        }
+
+        const modelFile = card.dataset.base || card.dataset.model;
+
+        if (!modelFile || modelFile === 'none') {
             return null;
-        });
-
-        modelCache.set(cacheKey, promise);
-        return await promise;
-    }
-
-    // 각 카드에 썸네일 렌더링
-   for (const card of cards) {
-    // 정지 이미지가 지정된 카드는 GLB 썸네일을 렌더링하지 않음
-    if (card.dataset.thumb) {
-        continue;
-    }
-
-    if (card.querySelector('.part-thumbnail-canvas')) {
-        continue;
-    }
-
-    const model = await getThumbnailModel(card);
-
-        if (!model) {
-            continue;
         }
 
-        const canvas = document.createElement('canvas');
-        canvas.width = 160;
-        canvas.height = 120;
-        canvas.className = 'part-thumbnail-canvas';
-        canvas.style.width = '100%';
-        canvas.style.height = '100px';
-        canvas.style.display = 'block';
+        return await loadCachedModel(modelFile, modelFile);
+    }
 
-        card.prepend(canvas);
+    // 각 카드 사이에 브라우저가 화면을 갱신할 시간 제공
+    function nextFrame() {
+        return new Promise(resolve => {
+            requestAnimationFrame(resolve);
+        });
+    }
 
-        // 원본 모델과 분리된 복제본
-        const previewModel = model.clone(true);
+    try {
+        for (const card of cards) {
+            // 이미 정지 이미지가 있으면 GLB 렌더링 생략
+            if (
+                card.dataset.thumb ||
+                card.querySelector('img.option-thumb')
+            ) {
+                continue;
+            }
 
-        // 파츠 / 케이스 / 키캡별 회전 설정
-        const modelKey =
-            card.dataset.part ||
-            card.dataset.base ||
-            card.dataset.model;
+            if (card.querySelector('.part-thumbnail-canvas')) {
+                continue;
+            }
 
-        const rotation = THUMBNAIL_ROTATIONS[modelKey] || {
-            x: 0,
-            y: 0,
-            z: 0
-        };
+            // 모델 로딩 대기
+            const model = await getThumbnailModel(card);
 
-        previewModel.rotation.set(
-            THREE.MathUtils.degToRad(rotation.x),
-            THREE.MathUtils.degToRad(rotation.y),
-            THREE.MathUtils.degToRad(rotation.z)
-        );
+            if (!model) {
+                continue;
+            }
 
-        thumbScene.add(previewModel);
-        previewModel.updateMatrixWorld(true);
+            // 카드별 캔버스
+            const canvas = document.createElement('canvas');
+            canvas.width = 160;
+            canvas.height = 120;
+            canvas.className = 'part-thumbnail-canvas';
+            canvas.style.width = '100%';
+            canvas.style.height = '100px';
+            canvas.style.display = 'block';
 
-        // 모델 크기와 중심 계산
-        const box = new THREE.Box3().setFromObject(previewModel);
-        const size = box.getSize(new THREE.Vector3());
-        const center = box.getCenter(new THREE.Vector3());
+            card.prepend(canvas);
 
-        previewModel.position.sub(center);
-        previewModel.updateMatrixWorld(true);
+            const previewModel = model.clone(true);
 
-        const maxSize = Math.max(size.x, size.y, size.z);
+            const modelKey =
+                card.dataset.part ||
+                card.dataset.base ||
+                card.dataset.model;
 
-        if (maxSize > 0) {
-            const distance =
-                (maxSize / (2 * Math.tan(
-                    THREE.MathUtils.degToRad(thumbCamera.fov / 2)
-                ))) * 1.7;
+            const rotation =
+                THUMBNAIL_ROTATIONS[modelKey] || {
+                    x: 0, y: 0, z: 0
+                };
 
-            thumbCamera.position.set(
-                distance * 0.5,
-                distance * 0.5,
-                distance
+            previewModel.rotation.set(
+                THREE.MathUtils.degToRad(rotation.x),
+                THREE.MathUtils.degToRad(rotation.y),
+                THREE.MathUtils.degToRad(rotation.z)
             );
 
-            thumbCamera.near = Math.max(0.001, distance / 100);
-            thumbCamera.far = distance * 100;
-            thumbCamera.lookAt(0, 0, 0);
-            thumbCamera.updateProjectionMatrix();
+            thumbScene.add(previewModel);
+            previewModel.updateMatrixWorld(true);
 
-            thumbRenderer.render(thumbScene, thumbCamera);
+            const box = new THREE.Box3().setFromObject(previewModel);
+            const size = box.getSize(new THREE.Vector3());
+            const center = box.getCenter(new THREE.Vector3());
 
-            const context = canvas.getContext('2d');
+            previewModel.position.sub(center);
+            previewModel.updateMatrixWorld(true);
 
-            if (context) {
-                context.clearRect(0, 0, canvas.width, canvas.height);
-                context.drawImage(
-                    thumbRenderer.domElement,
-                    0,
-                    0,
-                    canvas.width,
-                    canvas.height
+            const maxSize = Math.max(size.x, size.y, size.z);
+
+            if (maxSize > 0) {
+                const distance =
+                    (maxSize / (
+                        2 * Math.tan(
+                            THREE.MathUtils.degToRad(
+                                thumbCamera.fov / 2
+                            )
+                        )
+                    )) * 1.7;
+
+                thumbCamera.position.set(
+                    distance * 0.5,
+                    distance * 0.5,
+                    distance
                 );
+
+                thumbCamera.near = Math.max(0.001, distance / 100);
+                thumbCamera.far = distance * 100;
+                thumbCamera.lookAt(0, 0, 0);
+                thumbCamera.updateProjectionMatrix();
+
+                thumbRenderer.render(thumbScene, thumbCamera);
+
+                const context = canvas.getContext('2d');
+
+                if (context) {
+                    context.drawImage(
+                        thumbRenderer.domElement,
+                        0, 0, canvas.width, canvas.height
+                    );
+                }
             }
+
+            thumbScene.remove(previewModel);
+
+            // 다음 카드로 넘어가기 전에 화면 갱신
+            await nextFrame();
         }
-
-        thumbScene.remove(previewModel);
+    } catch (error) {
+        console.error('썸네일 렌더링 중 오류:', error);
+    } finally {
+        thumbRenderer.dispose();
+        console.log('옵션 썸네일 렌더링 작업 종료');
     }
-
-    thumbRenderer.dispose();
-
-    console.log('파츠·케이스·키캡 썸네일 렌더링 완료');
 }
 
 animate();
