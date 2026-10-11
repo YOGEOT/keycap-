@@ -303,7 +303,7 @@ const PARTS = {
     corn: {
         file: 'corn.glb',
         name: '콘',
-        price: 1000
+        price: 1200
     },
 
     twister_potato: {
