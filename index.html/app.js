@@ -291,13 +291,13 @@ const PARTS = {
     potato_hotdog: {
         file: 'potato_hotdog.glb',
         name: '감자핫도그',
-        price: 1000
+        price: 1200
     },
 
     hotdog: {
         file: 'hotdog.glb',
         name: '핫도그',
-        price: 1000
+        price: 1200
     },
 
     corn: {
@@ -531,6 +531,8 @@ const ALL_PART_PRICES = {
     'narutomaki.all': 2000,
 
     'ramen.all': 4000,
+
+    'eggroll.all': 4000,
 
     'yakgwa.all': 4000
 
