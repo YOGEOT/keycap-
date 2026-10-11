@@ -2647,12 +2647,17 @@ async function renderOptionThumbnails() {
     }
 
     // 각 카드에 썸네일 렌더링
-    for (const card of cards) {
-        if (card.querySelector('.part-thumbnail-canvas')) {
-            continue;
-        }
+   for (const card of cards) {
+    // 정지 이미지가 지정된 카드는 GLB 썸네일을 렌더링하지 않음
+    if (card.dataset.thumb) {
+        continue;
+    }
 
-        const model = await getThumbnailModel(card);
+    if (card.querySelector('.part-thumbnail-canvas')) {
+        continue;
+    }
+
+    const model = await getThumbnailModel(card);
 
         if (!model) {
             continue;
