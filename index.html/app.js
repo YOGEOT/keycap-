@@ -2804,5 +2804,34 @@ if (document.readyState === 'loading') {
 }
 
 if (typeof animate === 'function') {
+    
+    // 모바일 옵션 카드 터치 애니메이션
+(function () {
+    let pressedCard = null;
+
+    document.addEventListener('touchstart', function (event) {
+        const card = event.target.closest(
+            '[data-part], [data-base], [data-model]'
+        );
+
+        if (!card) return;
+
+        pressedCard = card;
+        card.classList.add('touch-pressed');
+    }, { passive: true });
+
+    function releaseCard() {
+        if (!pressedCard) return;
+
+        pressedCard.classList.remove('touch-pressed');
+        pressedCard = null;
+    }
+
+    document.addEventListener('touchend', releaseCard, { passive: true });
+    document.addEventListener('touchcancel', releaseCard, { passive: true });
+    document.addEventListener('touchmove', releaseCard, { passive: true });
+})();
+
     animate();
+    
 }
