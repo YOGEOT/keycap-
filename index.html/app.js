@@ -502,15 +502,15 @@ const ALL_PART_PRICES = {
 
     'cookie.all': 4000,
 
-    'potato_hotdog.all': 4000,
+    'potato_hotdog.all': 4200,
 
-    'hotdog.all': 4000,
+    'hotdog.all': 4200,
 
-    'corn.all': 4000,
+    'corn.all': 4200,
 
     'twister_potato.all': 4000,
 
-    'sodduck.all': 4000,
+    'sodduck.all': 4200,
 
     'stick_dduck.all': 4000,
 
