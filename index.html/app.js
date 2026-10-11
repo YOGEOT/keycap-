@@ -305,16 +305,16 @@ const PARTS = {
         name: '콘',
         price: 1200
     },
+    
+    sodduck: {
+        file: 'sodduck.glb',
+        name: '소떡소떡',
+        price: 1200
+    },
 
     twister_potato: {
         file: 'twister_potato.glb',
         name: '회오리감자',
-        price: 1000
-    },
-
-    sodduck: {
-        file: 'sodduck.glb',
-        name: '소떡소떡',
         price: 1000
     },
 
