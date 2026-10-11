@@ -213,13 +213,13 @@ const PARTS = {
     peach: {
         file: 'peach.glb',
         name: '복숭아',
-        price: 1000
+        price: 800
     },
 
     apple: {
         file: 'apple.glb',
         name: '사과',
-        price: 1000
+        price: 800
     },
 
     wing_R: {
@@ -468,9 +468,9 @@ const ALL_PART_PRICES = {
 
     'chick.all': 5000,
 
-    'peach.all': 1000,
+    'peach.all': 2000,
 
-    'apple.all': 1000,
+    'apple.all': 2000,
 
     'egg.all': 4000,
 
