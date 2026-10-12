@@ -3201,7 +3201,7 @@ const THUMBNAIL_ROTATIONS = {
    파츠 옵션 카드 GLB 썸네일 (개선된 버전)
 ============================================================ */
 
-const THUMBNAIL_CACHE_VERSION = 'thumb-v1';
+const THUMBNAIL_CACHE_VERSION = 'thumb-v2';
 const THUMBNAIL_DB_NAME = 'FOMORA_ThumbnailDB';
 const THUMBNAIL_STORE_NAME = 'thumbnails';
 
