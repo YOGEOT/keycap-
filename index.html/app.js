@@ -1570,18 +1570,7 @@ function createToppingUI() {
     `;
 
     // 슬롯 정보 표시 영역 뒤에 배치
-    
-    // PC와 모바일 모두 동일한 위치에 토핑 UI 표시
-    const slotInfo = document.querySelector('.selected-slot-info');
-    const slotButton = document.querySelector('.slot');
-
-    if (slotInfo) {
-        slotInfo.insertAdjacentElement('afterend', panel);
-    } else if (slotButton && slotButton.parentElement) {
-        slotButton.parentElement.insertAdjacentElement('afterend', panel);
-    } else {
-        (container.parentElement || document.body).appendChild(panel);
-    }
+    const slotInfo =
         document.querySelector('.selected-slot-info');
 
     // 해당 영역이 없으면 슬롯 버튼이 있는 영역 뒤에 배치
