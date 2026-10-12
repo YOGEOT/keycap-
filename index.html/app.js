@@ -397,24 +397,25 @@ const PARTS = {
 // ============================================================
 
 const TOPPINGS = {
-    cheese: {
+    strawberry: {
         file: 'topping_strawberry.glb',
         name: '딸기 토핑',
         price: 1000
     },
 
-    sauce: {
-        file: 'topping_sauce.glb',
-        name: '소스 토핑',
-        price: 300
+    cream: {
+        file: 'topping_cream,jam.glb',
+        name: '크림잼 토핑',
+        price: 1000
     },
 
-    leaf: {
-        file: 'topping_leaf.glb',
-        name: '잎사귀 토핑',
-        price: 300
+    whipcream: {
+        file: 'topping_whipcream.glb',
+        name: '생크림 토핑',
+        price: 800
     }
 };
+
 
 // 토핑 위치 설정
 // gap은 파츠와 토핑 사이의 간격이며 Three.js 모델 단위입니다.
@@ -2027,13 +2028,23 @@ function moveToppingToSlot(toppingModel, slot) {
 
             // 두 면 사이의 간격 계산
             // ========================================
+
+            
     // 토핑 높이 미세 조정값 (직접 수정)
     // ========================================
-            const TOPPING_HEIGHT_ADJUST = -3;
+            // 토핑별 최종 높이 보정값
+const toppingHeightAdjust = {
+    strawberry: -3,
+    cream: -0.5,
+    whipcream: -0.5
+};
 
-    // 파츠 윗면과 토핑 아랫면 사이의 간격 보정
-            const gap =
-            partTopZ - toppingBottomZ + TOPPING_HEIGHT_ADJUST;
+const toppingName = selectedToppings[slot];
+
+const gap =
+    partTopZ -
+    toppingBottomZ +
+    (toppingHeightAdjust[toppingName] ?? -3);
 
             // 현재 토핑의 월드 위치에 Z축 보정 적용
             const correctedWorldPosition =
