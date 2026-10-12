@@ -1454,86 +1454,94 @@ function(
 // 토핑 UI 스타일
 // ============================================================
 
+
 function createToppingUI() {
     if (document.getElementById('fomora-topping-panel')) {
         return;
     }
 
-    const style = document.createElement('style');
+    // 기존 스타일과 중복되지 않도록 스타일을 한 번만 생성
+    if (!document.getElementById('fomora-topping-style')) {
+        const style = document.createElement('style');
+        style.id = 'fomora-topping-style';
 
-    style.id = 'fomora-topping-style';
+        style.textContent = `
+            #fomora-topping-panel {
+                display: block;
+                box-sizing: border-box;
+                width: 100%;
+                max-width: 100%;
+                min-width: 0;
+                margin: 16px 0;
+                padding: 16px;
+                border: 1px solid #e5e5e5;
+                border-radius: 12px;
+                background: #fff;
+                color: #333;
+                font-family: inherit;
+            }
 
-    style.textContent = `
-        #fomora-topping-panel {
-            box-sizing: border-box;
-            width: 100%;
-            max-width: 100%;
-            margin: 16px 0;
-            padding: 16px;
-            border: 1px solid #e5e5e5;
-            border-radius: 12px;
-            background: #fff;
-            color: #333;
-            font-family: inherit;
-        }
+            #fomora-topping-panel * {
+                box-sizing: border-box;
+            }
 
-        #fomora-topping-panel * {
-            box-sizing: border-box;
-        }
+            #fomora-topping-panel .topping-title {
+                margin: 0 0 6px;
+                font-size: 16px;
+                font-weight: 600;
+            }
 
-        #fomora-topping-panel .topping-title {
-            margin: 0 0 6px;
-            font-size: 16px;
-            font-weight: 600;
-        }
+            #fomora-topping-panel .topping-description {
+                margin: 0 0 14px;
+                color: #777;
+                font-size: 12px;
+                line-height: 1.5;
+            }
 
-        #fomora-topping-panel .topping-description {
-            margin: 0 0 14px;
-            color: #777;
-            font-size: 12px;
-            line-height: 1.5;
-        }
+            #fomora-topping-panel .topping-label {
+                display: block;
+                margin: 12px 0 7px;
+                font-size: 13px;
+                font-weight: 500;
+            }
 
-        #fomora-topping-panel .topping-label {
-            display: block;
-            margin: 12px 0 7px;
-            font-size: 13px;
-            font-weight: 500;
-        }
+            #fomora-topping-panel .topping-select {
+                display: block;
+                width: 100%;
+                min-height: 42px;
+                padding: 8px 10px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                background: #fff;
+                color: #333;
+                font: inherit;
+            }
 
-        #fomora-topping-panel .topping-select {
-            display: block;
-            width: 100%;
-            min-height: 42px;
-            padding: 8px 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background: #fff;
-            color: #333;
-            font: inherit;
-        }
-        
-        #fomora-topping-panel .topping-remove {
-            width: 100%;
-            margin-top: 10px;
-        }
+            #fomora-topping-panel .topping-remove {
+                display: block;
+                width: 100%;
+                min-height: 40px;
+                margin-top: 10px;
+                cursor: pointer;
+            }
 
-        #fomora-topping-panel .topping-current {
-            margin-top: 12px;
-            color: #777;
-            font-size: 12px;
-            line-height: 1.5;
-        }
-    `;
+            #fomora-topping-panel .topping-current {
+                margin-top: 12px;
+                color: #777;
+                font-size: 12px;
+                line-height: 1.5;
+            }
+        `;
 
-    document.head.appendChild(style);
+        document.head.appendChild(style);
+    }
 
     const panel = document.createElement('section');
-
     panel.id = 'fomora-topping-panel';
 
     panel.innerHTML = `
         <h3 class="topping-title">토핑(와플,마카롱)</h3>
+
         <p class="topping-description">
             현재 선택한 KEY에만 토핑이 적용됩니다.
         </p>
@@ -1542,10 +1550,7 @@ function createToppingUI() {
             토핑 종류
         </label>
 
-        <select
-            id="fomora-topping-select"
-            class="topping-select"
-        >
+        <select id="fomora-topping-select" class="topping-select">
             <option value="none">토핑 없음</option>
             ${Object.entries(TOPPINGS).map(([key, item]) => `
                 <option value="${key}">
@@ -1554,7 +1559,6 @@ function createToppingUI() {
             `).join('')}
         </select>
 
-        
         <button
             type="button"
             class="topping-remove"
@@ -1569,29 +1573,16 @@ function createToppingUI() {
         ></div>
     `;
 
-    // 슬롯 정보 표시 영역 뒤에 배치
-    const slotInfo =
-        document.querySelector('.selected-slot-info');
-
-    // 해당 영역이 없으면 슬롯 버튼이 있는 영역 뒤에 배치
-    const slotButton =
-        document.querySelector('.slot');
-
-    const mountPoint =
-        slotInfo ||
-        (slotButton ? slotButton.parentElement : null) ||
-        container.parentElement ||
-        document.body;
+    // PC와 모바일 모두 같은 위치에 배치
+    const slotInfo = document.querySelector('.selected-slot-info');
+    const slotButton = document.querySelector('.slot');
 
     if (slotInfo) {
         slotInfo.insertAdjacentElement('afterend', panel);
-    } else if (slotButton) {
-        slotButton.parentElement.insertAdjacentElement(
-            'afterend',
-            panel
-        );
+    } else if (slotButton && slotButton.parentElement) {
+        slotButton.parentElement.insertAdjacentElement('afterend', panel);
     } else {
-        mountPoint.appendChild(panel);
+        (container.parentElement || document.body).appendChild(panel);
     }
 
     document
@@ -1600,7 +1591,6 @@ function createToppingUI() {
             window.selectTopping(event.target.value);
         });
 
-    
     document
         .getElementById('fomora-topping-remove')
         .addEventListener('click', () => {
