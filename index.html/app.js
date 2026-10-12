@@ -1594,6 +1594,17 @@ function createToppingUI() {
         mountPoint.appendChild(panel);
     }
 
+    console.log(
+    '토핑 패널 생성 확인:',
+    document.getElementById('fomora-topping-panel')
+);
+
+console.log(
+    '토핑 패널 표시 위치:',
+    document.getElementById('fomora-topping-panel')
+        ?.getBoundingClientRect()
+);
+
     document
         .getElementById('fomora-topping-select')
         .addEventListener('change', event => {
