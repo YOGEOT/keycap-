@@ -2036,7 +2036,7 @@ function moveToppingToSlot(toppingModel, slot) {
 const toppingHeightAdjust = {
     strawberry: -3,
     cream: -0.5,
-    whipcream: -0.5
+    whipcream: -1.2
 };
 
 const toppingName = selectedToppings[slot];
