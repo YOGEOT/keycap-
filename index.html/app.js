@@ -392,6 +392,51 @@ const PARTS = {
 
 };
 
+// ============================================================
+// 토핑 옵션
+// ============================================================
+
+const TOPPINGS = {
+    cheese: {
+        file: 'topping_strawberry.glb',
+        name: '딸기 토핑',
+        price: 1000
+    },
+
+    sauce: {
+        file: 'topping_sauce.glb',
+        name: '소스 토핑',
+        price: 300
+    },
+
+    leaf: {
+        file: 'topping_leaf.glb',
+        name: '잎사귀 토핑',
+        price: 300
+    }
+};
+
+// 토핑 위치 설정
+// gap은 파츠와 토핑 사이의 간격이며 Three.js 모델 단위입니다.
+const TOPPING_PLACEMENT = {
+    top: {
+        name: '위쪽',
+        gap: 0.01
+    },
+
+    side: {
+        name: '옆쪽',
+        gap: 0.01
+    }
+};
+
+const TOPPING_OFFSET = {
+    x: 0,
+    y: 0,
+    z: 0
+};
+
+
 
 // ============================================================
 // 축 / 스위치 옵션
@@ -577,6 +622,29 @@ let selectedParts = [
     null,
     null
 ];
+
+
+// ============================================================
+// 슬롯별 토핑 상태
+// ============================================================
+
+// 슬롯별로 선택한 토핑 이름
+let selectedToppings = [
+    null, null, null, null, null, null
+];
+
+// 슬롯별 토핑 GLB 모델
+let toppingModels = [
+    null, null, null, null, null, null
+];
+
+// 슬롯별 배치 위치: top 또는 side
+let toppingPlacements = [
+    'top', 'top', 'top', 'top', 'top', 'top'
+];
+
+// 비동기 로드 중 오래된 선택이 덮어쓰지 않도록 하는 번호
+let toppingLoadTokens = [0, 0, 0, 0, 0, 0];
 
 
 let switchModels = [
@@ -1054,6 +1122,11 @@ function updateThreeKeyCaseVisibility() {
 
         }
 
+        if (toppingModels[i]) {
+            toppingModels[i].visible =
+                visible;
+        }
+
 
         if (switchModels[i]) {
 
@@ -1369,8 +1442,209 @@ function(
 
     }
 
+    updateToppingUI();
+
+
 };
 
+
+
+
+// ============================================================
+// 토핑 UI 스타일
+// ============================================================
+
+function createToppingUI() {
+    if (document.getElementById('fomora-topping-panel')) {
+        return;
+    }
+
+    const style = document.createElement('style');
+
+    style.id = 'fomora-topping-style';
+
+    style.textContent = `
+        #fomora-topping-panel {
+            box-sizing: border-box;
+            width: 100%;
+            max-width: 100%;
+            margin: 16px 0;
+            padding: 16px;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            background: #fff;
+            color: #333;
+            font-family: inherit;
+        }
+
+        #fomora-topping-panel * {
+            box-sizing: border-box;
+        }
+
+        #fomora-topping-panel .topping-title {
+            margin: 0 0 6px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        #fomora-topping-panel .topping-description {
+            margin: 0 0 14px;
+            color: #777;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        #fomora-topping-panel .topping-label {
+            display: block;
+            margin: 12px 0 7px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        #fomora-topping-panel .topping-select {
+            display: block;
+            width: 100%;
+            min-height: 42px;
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fff;
+            color: #333;
+            font: inherit;
+        }
+        
+        #fomora-topping-panel .topping-remove {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        #fomora-topping-panel .topping-current {
+            margin-top: 12px;
+            color: #777;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+    `;
+
+    document.head.appendChild(style);
+
+    const panel = document.createElement('section');
+
+    panel.id = 'fomora-topping-panel';
+
+    panel.innerHTML = `
+        <h3 class="topping-title">토핑(와플,마카롱)</h3>
+        <p class="topping-description">
+            현재 선택한 KEY에만 토핑이 적용됩니다.
+        </p>
+
+        <label class="topping-label" for="fomora-topping-select">
+            토핑 종류
+        </label>
+
+        <select
+            id="fomora-topping-select"
+            class="topping-select"
+        >
+            <option value="none">토핑 없음</option>
+            ${Object.entries(TOPPINGS).map(([key, item]) => `
+                <option value="${key}">
+                    ${item.name} (+${item.price.toLocaleString('ko-KR')}원)
+                </option>
+            `).join('')}
+        </select>
+
+        
+        <button
+            type="button"
+            class="topping-remove"
+            id="fomora-topping-remove"
+        >
+            선택 슬롯의 토핑 제거
+        </button>
+
+        <div
+            class="topping-current"
+            id="fomora-topping-current"
+        ></div>
+    `;
+
+    // 슬롯 정보 표시 영역 뒤에 배치
+    const slotInfo =
+        document.querySelector('.selected-slot-info');
+
+    // 해당 영역이 없으면 슬롯 버튼이 있는 영역 뒤에 배치
+    const slotButton =
+        document.querySelector('.slot');
+
+    const mountPoint =
+        slotInfo ||
+        (slotButton ? slotButton.parentElement : null) ||
+        container.parentElement ||
+        document.body;
+
+    if (slotInfo) {
+        slotInfo.insertAdjacentElement('afterend', panel);
+    } else if (slotButton) {
+        slotButton.parentElement.insertAdjacentElement(
+            'afterend',
+            panel
+        );
+    } else {
+        mountPoint.appendChild(panel);
+    }
+
+    document
+        .getElementById('fomora-topping-select')
+        .addEventListener('change', event => {
+            window.selectTopping(event.target.value);
+        });
+
+    
+    document
+        .getElementById('fomora-topping-remove')
+        .addEventListener('click', () => {
+            window.selectTopping('none');
+        });
+
+    updateToppingUI();
+}
+
+
+// ============================================================
+// 현재 슬롯의 토핑 상태를 UI에 반영
+// ============================================================
+
+function updateToppingUI() {
+    const panel =
+        document.getElementById('fomora-topping-panel');
+
+    if (!panel) return;
+
+    const slot = selectedSlot;
+
+    const select =
+        document.getElementById('fomora-topping-select');
+
+    const current =
+        document.getElementById('fomora-topping-current');
+
+    if (select) {
+        select.value = selectedToppings[slot] || 'none';
+    }
+
+    
+    if (current) {
+    const toppingName = selectedToppings[slot];
+    const toppingInfo = toppingName
+        ? TOPPINGS[toppingName]
+        : null;
+
+    current.textContent = toppingInfo
+        ? `KEY ${slot + 1} · ${toppingInfo.name}`
+        : `KEY ${slot + 1} · 토핑 없음`;
+}
+}
 
 // ============================================================
 // 현재 색상 UI
@@ -1639,6 +1913,296 @@ function movePartToSlot(
 
 
 // ============================================================
+// 토핑 제거
+// ============================================================
+
+function removeToppingFromSlot(slot) {
+    // 진행 중인 비동기 로드를 무효화
+    toppingLoadTokens[slot]++;
+
+    if (toppingModels[slot]) {
+        productGroup.remove(toppingModels[slot]);
+        toppingModels[slot] = null;
+    }
+
+    selectedToppings[slot] = null;
+
+    updateToppingUI();
+}
+
+
+// ============================================================
+// 모든 토핑 제거
+// ============================================================
+
+function removeAllToppings() {
+    for (let i = 0; i < 6; i++) {
+        removeToppingFromSlot(i);
+    }
+}
+
+
+// ============================================================
+// 토핑 기준 파츠의 바운딩 박스
+// ============================================================
+
+function getToppingTargetBox(slot) {
+    // 기본 파츠가 있으면 기본 파츠를 기준으로 배치
+    const targetModel =
+        partModels[slot] || capModels[slot];
+
+    if (!targetModel) {
+        return null;
+    }
+
+    targetModel.updateWorldMatrix(true, true);
+
+    const box = new THREE.Box3().setFromObject(targetModel);
+
+    if (box.isEmpty()) {
+        return null;
+    }
+
+    return box;
+}
+
+
+// ============================================================
+// 토핑을 목표 위치로 이동
+// ============================================================
+
+
+function moveToppingToSlot(toppingModel, slot) {
+    if (!toppingModel) return;
+    if (!capModels[0] || !capModels[slot]) return;
+
+    const parent = toppingModel.parent;
+    if (!parent) return;
+
+    // 최초 위치 저장
+    if (!toppingModel.userData.originalPosition) {
+        toppingModel.userData.originalPosition =
+            toppingModel.position.clone();
+    }
+
+    // 매번 최초 위치에서 다시 계산
+    toppingModel.position.copy(
+        toppingModel.userData.originalPosition
+    );
+
+    productGroup.updateMatrixWorld(true);
+
+    // KEY 1과 선택 슬롯 사이의 위치 차이
+    const referenceCenter =
+        getModelWorldCenter(capModels[0]);
+
+    const targetCenter =
+        getModelWorldCenter(capModels[slot]);
+
+    const offset = targetCenter
+        .clone()
+        .sub(referenceCenter);
+
+    // 슬롯 위치로 이동할 월드 좌표 계산
+    toppingModel.updateWorldMatrix(true, true);
+
+    const slotWorldPosition =
+        toppingModel.getWorldPosition(
+            new THREE.Vector3()
+        ).add(offset);
+
+    // 월드 좌표를 부모의 로컬 좌표로 변환
+    parent.worldToLocal(slotWorldPosition);
+    toppingModel.position.copy(slotWorldPosition);
+
+    // 슬롯 배치 후 실제 경계 상자 갱신
+    productGroup.updateMatrixWorld(true);
+    toppingModel.updateWorldMatrix(true, true);
+
+    const targetPart = partModels[slot];
+
+    if (targetPart) {
+        targetPart.updateWorldMatrix(true, true);
+
+        const partBox = new THREE.Box3()
+            .setFromObject(targetPart);
+
+        const toppingBox = new THREE.Box3()
+            .setFromObject(toppingModel);
+
+        if (!partBox.isEmpty() && !toppingBox.isEmpty()) {
+            // 파츠의 윗면과 토핑의 최저점 계산
+            const partTopZ = partBox.max.z;
+            const toppingBottomZ = toppingBox.min.z;
+
+            // 두 면 사이의 간격 계산
+            // ========================================
+    // 토핑 높이 미세 조정값 (직접 수정)
+    // ========================================
+            const TOPPING_HEIGHT_ADJUST = -3;
+
+    // 파츠 윗면과 토핑 아랫면 사이의 간격 보정
+            const gap =
+            partTopZ - toppingBottomZ + TOPPING_HEIGHT_ADJUST;
+
+            // 현재 토핑의 월드 위치에 Z축 보정 적용
+            const correctedWorldPosition =
+                toppingModel.getWorldPosition(
+                    new THREE.Vector3()
+                );
+
+            correctedWorldPosition.z += gap;
+
+            // 보정된 월드 좌표를 로컬 좌표로 한 번만 변환
+            parent.worldToLocal(correctedWorldPosition);
+
+            toppingModel.position.copy(
+                correctedWorldPosition
+            );
+
+            console.log(`KEY ${slot + 1}: 토핑 밀착 보정`, {
+                partTopZ: partTopZ,
+                toppingBottomZ: toppingBottomZ,
+                gap: gap,
+                finalPosition: toppingModel.position.toArray()
+            });
+        }
+    }
+
+    productGroup.updateMatrixWorld(true);
+}
+
+function refreshToppingPosition(slot) {
+    const topping = toppingModels[slot];
+
+    if (!topping) return;
+
+    moveToppingToSlot(topping, slot);
+}
+
+
+
+// ============================================================
+// 토핑 선택 / 교체 / 제거
+// HTML에서 window.selectTopping(name)으로 호출 가능
+// ============================================================
+
+window.selectTopping = async function(toppingName) {
+    const slot = selectedSlot;
+
+    // 3구 케이스에서 사용할 수 없는 슬롯 차단
+    if (
+        isThreeKeyCase() &&
+        (slot === 1 || slot === 3 || slot === 5)
+    ) {
+        alert(
+            '3구 케이스에서는 KEY 2, 4, 6을 사용할 수 없습니다.'
+        );
+        return;
+    }
+
+    // 없음 선택: 현재 슬롯의 토핑만 제거
+    if (
+        toppingName === 'none' ||
+        toppingName === ''
+    ) {
+        removeToppingFromSlot(slot);
+        updatePrice();
+        return;
+    }
+
+    const toppingInfo = TOPPINGS[toppingName];
+
+    if (!toppingInfo) {
+        console.error('등록되지 않은 토핑:', toppingName);
+        return;
+    }
+
+    // 기존 토핑 제거 후 새 토핑 로드
+    removeToppingFromSlot(slot);
+
+    selectedToppings[slot] = toppingName;
+
+    const loadToken = toppingLoadTokens[slot];
+
+    try {
+        const model = await loadGLB(
+            `./${toppingInfo.file}`
+        );
+
+        // 로드 중 사용자가 다른 토핑을 선택했거나 제거한 경우
+        if (
+            toppingLoadTokens[slot] !== loadToken ||
+            selectedToppings[slot] !== toppingName
+        ) {
+            return;
+        }
+
+        productGroup.add(model);
+
+        toppingModels[slot] = model;
+
+        moveToppingToSlot(model, slot);
+
+        updateThreeKeyCaseVisibility();
+        updateToppingUI();
+        updatePrice();
+        fitCameraToProduct();
+
+    } catch (error) {
+        // 로드 실패 시 선택 상태도 초기화
+        if (
+            toppingLoadTokens[slot] === loadToken &&
+            selectedToppings[slot] === toppingName
+        ) {
+            selectedToppings[slot] = null;
+            toppingModels[slot] = null;
+        }
+
+        console.error(
+            '토핑 로드 실패:',
+            toppingInfo.file,
+            error
+        );
+
+        updateToppingUI();
+        updatePrice();
+    }
+};
+
+
+// ============================================================
+// 선택 슬롯 토핑 배치 방식 변경
+// top = 위쪽 / side = 옆쪽
+// ============================================================
+
+window.setToppingPlacement = function(placement) {
+    if (!TOPPING_PLACEMENT[placement]) {
+        console.error('잘못된 토핑 배치 방식:', placement);
+        return;
+    }
+
+    const slot = selectedSlot;
+
+    if (
+        isThreeKeyCase() &&
+        (slot === 1 || slot === 3 || slot === 5)
+    ) {
+        alert(
+            '3구 케이스에서는 KEY 2, 4, 6을 사용할 수 없습니다.'
+        );
+        return;
+    }
+
+    toppingPlacements[slot] = placement;
+
+    refreshToppingPosition(slot);
+    updateToppingUI();
+    updatePrice();
+};
+
+
+// ============================================================
 // 파츠 로드
 // ============================================================
 
@@ -1681,6 +2245,7 @@ async function loadPartToSlot(
             slot
         );
 
+       
 
         return part;
 
@@ -1793,6 +2358,8 @@ async function loadPartToAllSlots(
         selectedParts[i] =
             basePartName;
 
+        refreshToppingPosition(i);
+
 
         if (
             isThreeKeyCase() &&
@@ -1808,7 +2375,7 @@ async function loadPartToAllSlots(
 
         }
 
-    }
+    }    
 
 
     updateThreeKeyCaseVisibility();
@@ -1941,6 +2508,8 @@ async function(
     selectedParts[
         selectedSlot
     ] = partName;
+
+    refreshToppingPosition(selectedSlot);
 
 
     updateThreeKeyCaseVisibility();
@@ -2368,6 +2937,24 @@ function updatePrice() {
 
     }
 
+    // 토핑 가격 합산
+let toppingPrice = 0;
+
+for (let i = 0; i < 6; i++) {
+    const toppingName = selectedToppings[i];
+
+    if (!toppingName) continue;
+
+    const toppingInfo = TOPPINGS[toppingName];
+
+    if (!toppingInfo) continue;
+
+    toppingPrice += toppingInfo.price;
+}
+
+// 기존 파츠 가격에 토핑 가격 추가
+partPrice += toppingPrice;
+
 
     // 총 금액
 
@@ -2514,6 +3101,8 @@ async function init() {
     await loadBase(
         'case.glb'
     );
+
+    createToppingUI();
 
 
     await loadCaps(
