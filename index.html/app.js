@@ -1868,6 +1868,7 @@ function createToppingUI() {
     `;
 
     
+
 const panelContainer = document.querySelector('.panel');
 
 if (panelContainer) {
@@ -1879,41 +1880,73 @@ if (panelContainer) {
     );
 
     if (partsSection) {
-        // PC에서는 기존처럼 파츠 섹션 앞에 표시
-        panelContainer.insertBefore(panel, partsSection);
 
-        // 모바일에서는 파츠 섹션 안으로 이동
         function placeToppingPanel() {
             const isMobile = window.matchMedia(
                 '(max-width: 900px)'
             ).matches;
 
             if (isMobile) {
-                // 파츠 섹션 내부 맨 위에 배치
+                // 모바일에서만 파츠 섹션 안으로 이동
                 partsSection.insertBefore(
                     panel,
                     partsSection.firstChild
                 );
+
+                // 파츠 탭이 숨겨져 있을 때만 토핑 숨김
+                panel.style.display =
+                    partsSection.classList.contains(
+                        'mobile-section-hidden'
+                    )
+                        ? 'none'
+                        : 'block';
+
             } else {
-                // PC에서는 파츠 섹션 바로 앞에 배치
+                // PC: 기존 배치 방식 유지
                 panelContainer.insertBefore(
                     panel,
                     partsSection
                 );
+
+                // PC에서는 표시 상태를 강제로 복구
+                panel.style.removeProperty('display');
             }
         }
 
         placeToppingPanel();
 
-        // 화면 크기 변경 시 위치 재조정
         window.addEventListener(
             'resize',
             placeToppingPanel
         );
+
+        // 모바일 탭 전환에 따른 클래스 변경 감지
+        const toppingTabObserver = new MutationObserver(() => {
+            if (
+                window.matchMedia('(max-width: 900px)').matches
+            ) {
+                panel.style.display =
+                    partsSection.classList.contains(
+                        'mobile-section-hidden'
+                    )
+                        ? 'none'
+                        : 'block';
+            } else {
+                // PC에서는 표시 상태를 변경하지 않음
+                panel.style.removeProperty('display');
+            }
+        });
+
+        toppingTabObserver.observe(partsSection, {
+            attributes: true,
+            attributeFilter: ['class']
+        });
+
     } else {
         console.error('파츠 섹션을 찾을 수 없습니다.');
         panelContainer.appendChild(panel);
     }
+
 } else {
     console.error('토핑 옵션을 넣을 .panel 요소를 찾을 수 없습니다.');
 }
