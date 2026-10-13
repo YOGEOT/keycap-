@@ -2631,14 +2631,15 @@ if (label === '토핑' || label === '파츠') {
     return;
 }
 
-        // 파츠와 토핑 통합
-        if (label === '파츠' || label === '토핑') {
+        // 토핑과 파츠만 하나의 '파츠' 탭으로 통합
+        if (label.includes('토핑') || label.includes('파츠')) {
             if (!partsItem) {
                 partsItem = {
                     sections: [],
                     index,
                     label: '파츠'
                 };
+
                 items.push(partsItem);
             }
 
@@ -2646,20 +2647,20 @@ if (label === '토핑' || label === '파츠') {
             return;
         }
 
-                // 키캡 탭과 키캡 옵션 카드 모두 제거
-if (label === '키캡') {
-    section.remove();
-    return;
-}
+        // '키캡' 옵션 카드만 제거
+        if (label === '키캡') {
+            section.remove();
+            return;
+        }
 
-        // 나머지는 개별 탭
+        // 나머지 옵션은 각각 별도 탭으로 유지
         items.push({
             sections: [section],
             index,
             label
         });
     }); // sections.forEach 종료
-
+    
     if (!items.length) return;
 
     let activeIndex = 0;
