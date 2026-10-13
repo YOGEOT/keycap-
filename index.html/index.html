@@ -2582,6 +2582,116 @@
 ></script>
 
 
+<script>
+(() => {
+    const panel = document.querySelector('.panel');
+    if (!panel) return;
+
+    const sections = Array.from(
+        panel.querySelectorAll(':scope > .section')
+    );
+
+    if (!sections.length) {
+        console.warn('옵션 섹션을 찾을 수 없습니다.');
+        return;
+    }
+
+    const tabs = document.createElement('nav');
+    tabs.className = 'mobile-option-tabs';
+    tabs.setAttribute('aria-label', '옵션 카테고리');
+
+    const items = sections
+        .map((section, index) => {
+            const heading = section.querySelector('.section-title');
+
+            // 제목이 없는 가격 영역도 탭으로 표시
+            const label = heading
+                ? heading.textContent.trim()
+                : section.classList.contains('price-box')
+                    ? '가격'
+                    : null;
+
+            return label ? { section, index, label } : null;
+        })
+        .filter(Boolean);
+
+    if (!items.length) return;
+
+    let activeIndex = 0;
+    const mediaQuery = window.matchMedia('(max-width: 900px)');
+
+    items.forEach((item, tabIndex) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'mobile-option-tab';
+        button.textContent = item.label;
+        button.setAttribute('role', 'tab');
+
+        button.addEventListener('click', () => {
+            activeIndex = tabIndex;
+            updateLayout(true);
+        });
+
+        tabs.appendChild(button);
+    });
+
+    const title = panel.querySelector(':scope > h1');
+    if (title) {
+        title.insertAdjacentElement('afterend', tabs);
+    } else {
+        panel.prepend(tabs);
+    }
+
+    function updateLayout(scrollToTab = false) {
+        const mobile = mediaQuery.matches;
+
+        sections.forEach(section => {
+            section.classList.remove(
+                'mobile-section-active',
+                'mobile-section-hidden'
+            );
+        });
+
+        items.forEach((item, tabIndex) => {
+            const active = tabIndex === activeIndex;
+            const button = tabs.children[tabIndex];
+
+            button.classList.toggle('active', active);
+            button.setAttribute('aria-selected', String(active));
+
+            if (mobile) {
+                item.section.classList.toggle(
+                    'mobile-section-active',
+                    active
+                );
+                item.section.classList.toggle(
+                    'mobile-section-hidden',
+                    !active
+                );
+            }
+        });
+
+        if (mobile && scrollToTab) {
+            tabs.children[activeIndex]?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'center'
+            });
+            panel.scrollTop = 0;
+        }
+    }
+
+    updateLayout();
+
+    if (mediaQuery.addEventListener) {
+        mediaQuery.addEventListener('change', () => updateLayout());
+    } else {
+        mediaQuery.addListener(() => updateLayout());
+    }
+})();
+</script>
+
+
 </body>
 
 </html>
