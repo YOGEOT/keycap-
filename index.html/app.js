@@ -1867,11 +1867,10 @@ function createToppingUI() {
         ></div>
     `;
 
-    // PC와 모바일 모두 .panel 내부에 토핑 옵션 배치
+    
 const panelContainer = document.querySelector('.panel');
 
 if (panelContainer) {
-    // 파츠 옵션 앞에 토핑 옵션 배치
     const partsSection = Array.from(
         panelContainer.querySelectorAll(':scope > .section')
     ).find(section =>
@@ -1880,8 +1879,39 @@ if (panelContainer) {
     );
 
     if (partsSection) {
-        partsSection.insertAdjacentElement('beforebegin', panel);
+        // PC에서는 기존처럼 파츠 섹션 앞에 표시
+        panelContainer.insertBefore(panel, partsSection);
+
+        // 모바일에서는 파츠 섹션 안으로 이동
+        function placeToppingPanel() {
+            const isMobile = window.matchMedia(
+                '(max-width: 900px)'
+            ).matches;
+
+            if (isMobile) {
+                // 파츠 섹션 내부 맨 위에 배치
+                partsSection.insertBefore(
+                    panel,
+                    partsSection.firstChild
+                );
+            } else {
+                // PC에서는 파츠 섹션 바로 앞에 배치
+                panelContainer.insertBefore(
+                    panel,
+                    partsSection
+                );
+            }
+        }
+
+        placeToppingPanel();
+
+        // 화면 크기 변경 시 위치 재조정
+        window.addEventListener(
+            'resize',
+            placeToppingPanel
+        );
     } else {
+        console.error('파츠 섹션을 찾을 수 없습니다.');
         panelContainer.appendChild(panel);
     }
 } else {
