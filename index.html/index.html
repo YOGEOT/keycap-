@@ -2616,20 +2616,20 @@
 
         if (!label) return;
 
-        // 키캡 색상 두 섹션 통합
-        if (label === '키캡 색상' || label === '전체 키캡 색상') {
-            if (!keycapColorItem) {
-                keycapColorItem = {
-                    sections: [],
-                    index,
-                    label: '키캡 색상'
-                };
-                items.push(keycapColorItem);
-            }
+        // 토핑만 파츠 탭에 통합
+if (label === '토핑' || label === '파츠') {
+    if (!partsItem) {
+        partsItem = {
+            sections: [],
+            index,
+            label: '파츠'
+        };
+        items.push(partsItem);
+    }
 
-            keycapColorItem.sections.push(section);
-            return;
-        }
+    partsItem.sections.push(section);
+    return;
+}
 
         // 파츠와 토핑 통합
         if (label === '파츠' || label === '토핑') {
@@ -2646,10 +2646,11 @@
             return;
         }
 
-                // 키캡 탭은 목록에서 제외
-        if (label === '키캡') {
-            return;
-        }
+                // 키캡 탭과 키캡 옵션 카드 모두 제거
+if (label === '키캡') {
+    section.remove();
+    return;
+}
 
         // 나머지는 개별 탭
         items.push({
