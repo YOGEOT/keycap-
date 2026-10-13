@@ -1408,58 +1408,40 @@ function applyKeycapColorToModel(
 // Slot 선택
 // ============================================================
 
-window.selectSlot =
-function(
-    slot,
-    element
-) {
 
-    document
-        .querySelectorAll(
-            '.slot'
-        )
-        .forEach(item => {
-
-            item.classList.remove(
-                'active'
-            );
-
-        });
-
-
-    element.classList.add(
-        'active'
-    );
-
-
-    selectedSlot =
-        slot;
-
-
-    updateCurrentColorUI();
-
-
-    const selectedSlotInfo =
-        document.querySelector(
-            '.selected-slot-info'
-        );
-
-
-    if (selectedSlotInfo) {
-
-        selectedSlotInfo.textContent =
-            `선택된 위치 : KEY ${
-                selectedSlot + 1
-            }`;
-
+window.selectSlot = function(slot, element) {
+    // 잘못된 슬롯 번호 방지
+    if (!Number.isInteger(slot) || slot < 0 || slot >= 6) {
+        return;
     }
 
+    // 선택된 슬롯 번호를 먼저 변경
+    selectedSlot = slot;
 
-updateToppingUI();
+    // 슬롯 버튼이 존재할 때만 활성화 표시 변경
+    document.querySelectorAll('.slot').forEach(item => {
+        item.classList.remove('active');
+    });
 
-// 선택한 키캡에 흰색 외곽선 표시
-setSelectedCapOutline(selectedSlot);
+    if (element) {
+        element.classList.add('active');
+    }
 
+    // 현재 색상 UI 갱신
+    updateCurrentColorUI();
+
+    // 선택된 위치 텍스트 갱신
+    const selectedSlotInfo =
+        document.querySelector('.selected-slot-info');
+
+    if (selectedSlotInfo) {
+        selectedSlotInfo.textContent =
+            `선택된 위치 : KEY ${selectedSlot + 1}`;
+    }
+
+    // 토핑 UI 및 키캡 외곽선 갱신
+    updateToppingUI();
+    setSelectedCapOutline(selectedSlot);
 };
 
 // ============================================================
@@ -1470,7 +1452,9 @@ setSelectedCapOutline(selectedSlot);
 (function enableDirectKeycapSelection() {
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
-    let pointerStart = null;
+    
+let pointerStart = null;
+let pointerDownHit = null;
 
     // 키캡을 누를 때 살짝 내려갔다가 복귀하는 모션
     const capPressStates = new WeakMap();
@@ -1578,48 +1562,72 @@ setSelectedCapOutline(selectedSlot);
     state.animationId = requestAnimationFrame(pressFrame);
 }
 
-    renderer.domElement.addEventListener('pointerdown', (event) => {
-        pointerStart = {
-            x: event.clientX,
-            y: event.clientY,
-            pointerId: event.pointerId
-        };
+    
+renderer.domElement.addEventListener('pointerdown', (event) => {
+    pointerStart = {
+        x: event.clientX,
+        y: event.clientY,
+        pointerId: event.pointerId
+    };
 
-        // 누르는 순간 키캡에 눌림 모션 적용 (선택은 기존처럼 pointerup에서 처리)
-        const hit = getKeycapHit(event.clientX, event.clientY);
-        if (hit) animateCapPress(hit.model);
-    }, { passive: true });
+    // 누르는 순간 감지한 키캡을 저장
+    pointerDownHit = getKeycapHit(
+        event.clientX,
+        event.clientY
+    );
 
-    renderer.domElement.addEventListener('pointerup', (event) => {
-        if (!pointerStart || pointerStart.pointerId !== event.pointerId) {
-            pointerStart = null;
-            return;
-        }
+    // 저장한 키캡에 눌림 모션 적용
+    if (pointerDownHit) {
+        animateCapPress(pointerDownHit.model);
+    }
+}, { passive: true });
 
-        const movedX = event.clientX - pointerStart.x;
-        const movedY = event.clientY - pointerStart.y;
+
+renderer.domElement.addEventListener('pointerup', (event) => {
+    if (
+        !pointerStart ||
+        pointerStart.pointerId !== event.pointerId
+    ) {
         pointerStart = null;
+        pointerDownHit = null;
+        return;
+    }
 
-        // 카메라를 돌리거나 화면을 드래그한 동작은 슬롯 선택으로 처리하지 않음
-        if (Math.hypot(movedX, movedY) > 8) return;
+    const movedX = event.clientX - pointerStart.x;
+    const movedY = event.clientY - pointerStart.y;
 
-        const nearestHit = getKeycapHit(event.clientX, event.clientY);
-        if (!nearestHit) return;
+    // 눌렀을 때 감지한 키캡을 먼저 저장
+    const hitOnDown = pointerDownHit;
 
-       const slotButtons = document.querySelectorAll('.slot');
-const slotButton = slotButtons[nearestHit.slot];
+    pointerStart = null;
+    pointerDownHit = null;
 
-if (slotButton) {
+    // 드래그한 경우에는 슬롯을 선택하지 않음
+    if (Math.hypot(movedX, movedY) > 8) {
+        return;
+    }
+
+    // 눌렀을 때 감지한 키캡으로 슬롯 선택
+    // 눌렀을 때 감지하지 못한 경우에만 다시 감지
+    const nearestHit =
+        hitOnDown ||
+        getKeycapHit(event.clientX, event.clientY);
+
+    if (!nearestHit) return;
+
+    const slotButtons = document.querySelectorAll('.slot');
+    const slotButton = slotButtons[nearestHit.slot] || null;
+
+    // 선택 슬롯 변경
     window.selectSlot(nearestHit.slot, slotButton);
 
-    // 선택된 캡에만 외곽선 표시
-    setSelectedCapOutline(nearestHit.slot);
-}
-    }, { passive: true });
+}, { passive: true });
 
-    renderer.domElement.addEventListener('pointercancel', () => {
-        pointerStart = null;
-    }, { passive: true });
+
+renderer.domElement.addEventListener('pointercancel', () => {
+    pointerStart = null;
+    pointerDownHit = null;
+}, { passive: true });
 })();
 
 
@@ -1859,17 +1867,26 @@ function createToppingUI() {
         ></div>
     `;
 
-    // PC와 모바일 모두 같은 위치에 배치
-    const slotInfo = document.querySelector('.selected-slot-info');
-    const slotButton = document.querySelector('.slot');
+    // PC와 모바일 모두 .panel 내부에 토핑 옵션 배치
+const panelContainer = document.querySelector('.panel');
 
-    if (slotInfo) {
-        slotInfo.insertAdjacentElement('afterend', panel);
-    } else if (slotButton && slotButton.parentElement) {
-        slotButton.parentElement.insertAdjacentElement('afterend', panel);
+if (panelContainer) {
+    // 파츠 옵션 앞에 토핑 옵션 배치
+    const partsSection = Array.from(
+        panelContainer.querySelectorAll(':scope > .section')
+    ).find(section =>
+        section.querySelector('.section-title')
+            ?.textContent.trim() === '파츠'
+    );
+
+    if (partsSection) {
+        partsSection.insertAdjacentElement('beforebegin', panel);
     } else {
-        (container.parentElement || document.body).appendChild(panel);
+        panelContainer.appendChild(panel);
     }
+} else {
+    console.error('토핑 옵션을 넣을 .panel 요소를 찾을 수 없습니다.');
+}
 
     document
         .getElementById('fomora-topping-select')
@@ -1968,50 +1985,32 @@ function updateCurrentColorUI() {
 // Keycap 색상 변경
 // ============================================================
 
-window.changeKeycapColor =
-function(
-    color,
-    element
-) {
 
-    selectedKeycapColors[
-        selectedSlot
-    ] = color;
+ // ============================================================
+// Keycap 색상 변경
+// ============================================================
 
+window.changeKeycapColor = function(color, element) {
+    selectedKeycapColors[selectedSlot] = color;
 
-    if (
-        capModels[selectedSlot]
-    ) {
-
+    if (capModels[selectedSlot]) {
         applyKeycapColorToModel(
             capModels[selectedSlot],
             color
         );
-
     }
-
 
     if (element) {
+        if (element.parentElement) {
+            element.parentElement
+                .querySelectorAll('.color')
+                .forEach(item => {
+                    item.classList.remove('active');
+                });
+        }
 
-        element.parentElement
-            .querySelectorAll(
-                '.color'
-            )
-            .forEach(item => {
-
-                item.classList.remove(
-                    'active'
-                );
-
-            });
-
-
-        element.classList.add(
-            'active'
-        );
-
+        element.classList.add('active');
     }
-
 };
 
 

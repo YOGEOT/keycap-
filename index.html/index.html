@@ -717,78 +717,7 @@
 
 
 
-        <!-- ==================================================
-             KEY
-        ================================================== -->
-
-        <div class="section">
-
-            <div class="section-title">
-                키캡
-            </div>
-
-
-            <div class="slot-grid">
-
-
-                <div
-                    class="slot active"
-                    onclick="selectSlot(0, this)"
-                >
-                    KEY 1
-                </div>
-
-
-                <div
-                    class="slot"
-                    onclick="selectSlot(1, this)"
-                >
-                    KEY 2
-                </div>
-
-
-                <div
-                    class="slot"
-                    onclick="selectSlot(2, this)"
-                >
-                    KEY 3
-                </div>
-
-
-                <div
-                    class="slot"
-                    onclick="selectSlot(3, this)"
-                >
-                    KEY 4
-                </div>
-
-
-                <div
-                    class="slot"
-                    onclick="selectSlot(4, this)"
-                >
-                    KEY 5
-                </div>
-
-
-                <div
-                    class="slot"
-                    onclick="selectSlot(5, this)"
-                >
-                    KEY 6
-                </div>
-
-
-            </div>
-
-
-            <div class="selected-slot-info">
-                선택된 위치 : KEY 1
-            </div>
-
-        </div>
-
-
+        
 
         <!-- ==================================================
              케이스 색상
@@ -2617,12 +2546,11 @@ sections.forEach((section, index) => {
 
     if (!label) return;
 
-    // 키캡 슬롯 선택 섹션만 제거
-    // 키캡 색상 관련 섹션은 유지
-    if (label === '키캡') {
-        section.remove();
-        return;
-    }
+    // 키캡 슬롯 선택 섹션은 탭 목록에서 제외
+// 실제 섹션은 삭제하지 않음 (PC에서는 유지)
+if (label === '키캡') {
+    return;
+}
 
     // 파츠 섹션은 파츠 탭으로 유지
     if (label.includes('파츠')) {
@@ -2696,11 +2624,19 @@ if (partsTab) {
         const mobile = mediaQuery.matches;
 
         sections.forEach(section => {
-            section.classList.remove(
-                'mobile-section-active',
-                'mobile-section-hidden'
-            );
-        });
+    section.classList.remove(
+        'mobile-section-active',
+        'mobile-section-hidden'
+    );
+
+    const heading = section.querySelector('.section-title');
+    const label = heading ? heading.textContent.trim() : '';
+
+    // 키캡 슬롯 선택 영역은 모바일에서만 숨김
+    if (mobile && label === '키캡') {
+        section.classList.add('mobile-section-hidden');
+    }
+});
 
         items.forEach((item, tabIndex) => {
             const active = tabIndex === activeIndex;
