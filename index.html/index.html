@@ -2600,40 +2600,62 @@
     tabs.className = 'mobile-option-tabs';
     tabs.setAttribute('aria-label', '옵션 카테고리');
 
-    const items = sections
-        .map((section, index) => {
-            const heading = section.querySelector('.section-title');
+    
 
-            // 제목이 없는 가격 영역도 탭으로 표시
-            const label = heading
-                ? heading.textContent.trim()
-                : section.classList.contains('price-box')
-                    ? '가격'
-                    : null;
+const items = [];
+let keycapColorItem = null;
+let partsItem = null;
 
-            return label ? { section, index, label } : null;
-        })
-        .filter(Boolean);
+sections.forEach((section, index) => {
+    const heading = section.querySelector('.section-title');
 
-    if (!items.length) return;
+    const label = heading
+        ? heading.textContent.trim()
+        : section.classList.contains('price-box')
+            ? '가격'
+            : null;
 
-    let activeIndex = 0;
-    const mediaQuery = window.matchMedia('(max-width: 900px)');
+    if (!label) return;
 
-    items.forEach((item, tabIndex) => {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'mobile-option-tab';
-        button.textContent = item.label;
-        button.setAttribute('role', 'tab');
+    // 키캡 색상 + 전체 키캡 색상 통합
+    if (label === '키캡 색상' || label === '전체 키캡 색상') {
+        if (!keycapColorItem) {
+            keycapColorItem = {
+                sections: [],
+                index,
+                label: '키캡 색상'
+            };
 
-        button.addEventListener('click', () => {
-            activeIndex = tabIndex;
-            updateLayout(true);
-        });
+            items.push(keycapColorItem);
+        }
 
-        tabs.appendChild(button);
+        keycapColorItem.sections.push(section);
+        return;
+    }
+
+    // 파츠 + 토핑 통합
+    if (label === '파츠' || label === '토핑') {
+        if (!partsItem) {
+            partsItem = {
+                sections: [],
+                index,
+                label: '파츠'
+            };
+
+            items.push(partsItem);
+        }
+
+        partsItem.sections.push(section);
+        return;
+    }
+
+    // 나머지 섹션은 각각 별도 탭
+    items.push({
+        sections: [section],
+        index,
+        label
     });
+});
 
     const title = panel.querySelector(':scope > h1');
     if (title) {
