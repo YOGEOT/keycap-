@@ -3084,21 +3084,17 @@ async function reloadSelectedSwitch() {
 // ⭐ 축 선택
 // ============================================================
 
-window.selectSwitch =
-async function(
-    switchName,
-    element
-) {
+window.selectSwitch = async function(switchName, element) {
 
-    if (
-        !SWITCH_OPTIONS[
-            switchName
-        ]
-    ) {
+    console.log('축 선택 함수 실행:', switchName);
+    console.log('선택된 요소:', element);
 
+    if (!SWITCH_OPTIONS[switchName]) {
+        console.log('등록되지 않은 축:', switchName);
         return;
-
     }
+
+    // 아래는 기존 코드 그대로 유지
 
 
     selectedSwitch =
