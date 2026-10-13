@@ -2646,18 +2646,36 @@
             return;
         }
 
-        // 나머지는 개별 탭
-        items.push({
-            sections: [section],
-            index,
-            label
-        });
-    });
+        // 키캡 탭은 목록에서 제외
+if (label === '키캡') {
+    return;
+}
+
+// 나머지는 개별 탭
+items.push({
+    sections: [section],
+    index,
+    label
+});
 
     if (!items.length) return;
 
     let activeIndex = 0;
     const mediaQuery = window.matchMedia('(max-width: 900px)');
+
+    // 파츠 탭 안에서 토핑 섹션을 가장 위로 표시
+const partsTab = items.find(item => item.label === '파츠');
+
+if (partsTab) {
+    partsTab.sections.sort((a, b) => {
+        const aIsTopping =
+            a.querySelector('.section-title')?.textContent.trim() === '토핑';
+        const bIsTopping =
+            b.querySelector('.section-title')?.textContent.trim() === '토핑';
+
+        return Number(bIsTopping) - Number(aIsTopping);
+    });
+}
 
     // 탭 버튼 생성
     items.forEach((item, tabIndex) => {
