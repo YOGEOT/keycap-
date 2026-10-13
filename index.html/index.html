@@ -2582,6 +2582,7 @@
 ></script>
 
 
+
 <script>
 (() => {
     const panel = document.querySelector('.panel');
@@ -2600,64 +2601,83 @@
     tabs.className = 'mobile-option-tabs';
     tabs.setAttribute('aria-label', '옵션 카테고리');
 
-    
+    const items = [];
+    let keycapColorItem = null;
+    let partsItem = null;
 
-const items = [];
-let keycapColorItem = null;
-let partsItem = null;
+    sections.forEach((section, index) => {
+        const heading = section.querySelector('.section-title');
 
-sections.forEach((section, index) => {
-    const heading = section.querySelector('.section-title');
+        const label = heading
+            ? heading.textContent.trim()
+            : section.classList.contains('price-box')
+                ? '가격'
+                : null;
 
-    const label = heading
-        ? heading.textContent.trim()
-        : section.classList.contains('price-box')
-            ? '가격'
-            : null;
+        if (!label) return;
 
-    if (!label) return;
+        // 키캡 색상 두 섹션 통합
+        if (label === '키캡 색상' || label === '전체 키캡 색상') {
+            if (!keycapColorItem) {
+                keycapColorItem = {
+                    sections: [],
+                    index,
+                    label: '키캡 색상'
+                };
+                items.push(keycapColorItem);
+            }
 
-    // 키캡 색상 + 전체 키캡 색상 통합
-    if (label === '키캡 색상' || label === '전체 키캡 색상') {
-        if (!keycapColorItem) {
-            keycapColorItem = {
-                sections: [],
-                index,
-                label: '키캡 색상'
-            };
-
-            items.push(keycapColorItem);
+            keycapColorItem.sections.push(section);
+            return;
         }
 
-        keycapColorItem.sections.push(section);
-        return;
-    }
+        // 파츠와 토핑 통합
+        if (label === '파츠' || label === '토핑') {
+            if (!partsItem) {
+                partsItem = {
+                    sections: [],
+                    index,
+                    label: '파츠'
+                };
+                items.push(partsItem);
+            }
 
-    // 파츠 + 토핑 통합
-    if (label === '파츠' || label === '토핑') {
-        if (!partsItem) {
-            partsItem = {
-                sections: [],
-                index,
-                label: '파츠'
-            };
-
-            items.push(partsItem);
+            partsItem.sections.push(section);
+            return;
         }
 
-        partsItem.sections.push(section);
-        return;
-    }
-
-    // 나머지 섹션은 각각 별도 탭
-    items.push({
-        sections: [section],
-        index,
-        label
+        // 나머지는 개별 탭
+        items.push({
+            sections: [section],
+            index,
+            label
+        });
     });
-});
+
+    if (!items.length) return;
+
+    let activeIndex = 0;
+    const mediaQuery = window.matchMedia('(max-width: 900px)');
+
+    // 탭 버튼 생성
+    items.forEach((item, tabIndex) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'mobile-option-tab';
+        button.textContent = item.label;
+        button.setAttribute('role', 'tab');
+        button.setAttribute('aria-selected', 'false');
+
+        button.addEventListener('click', () => {
+            activeIndex = tabIndex;
+            updateLayout(true);
+        });
+
+        tabs.appendChild(button);
+    });
 
     const title = panel.querySelector(':scope > h1');
+
     if (title) {
         title.insertAdjacentElement('afterend', tabs);
     } else {
@@ -2682,14 +2702,16 @@ sections.forEach((section, index) => {
             button.setAttribute('aria-selected', String(active));
 
             if (mobile) {
-                item.section.classList.toggle(
-                    'mobile-section-active',
-                    active
-                );
-                item.section.classList.toggle(
-                    'mobile-section-hidden',
-                    !active
-                );
+                item.sections.forEach(section => {
+                    section.classList.toggle(
+                        'mobile-section-active',
+                        active
+                    );
+                    section.classList.toggle(
+                        'mobile-section-hidden',
+                        !active
+                    );
+                });
             }
         });
 
@@ -2699,6 +2721,7 @@ sections.forEach((section, index) => {
                 block: 'nearest',
                 inline: 'center'
             });
+
             panel.scrollTop = 0;
         }
     }
