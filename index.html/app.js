@@ -473,6 +473,12 @@ const SWITCH_OPTIONS = {
         file: 'strawberry_latte.glb',
         name: '딸기라떼축',
         price: 0
+    },
+
+    pinksalt: {
+        file: 'pinksalt.glb',
+        name: '저소음핑크솔트축',
+        price: 0
     }
 
 };
