@@ -687,47 +687,51 @@ let selectedKeycapColors = [
 
 window.selectAllKeycapColor = function(color, element) {
 
-    // 전체 키캡 색상 변경
+    // 전체 키캡 색상 저장
     for (let i = 0; i < 6; i++) {
-
-        // 현재 선택된 색상값 저장
         selectedKeycapColors[i] = color;
-
     }
 
-    // 현재 로드된 키캡에 색상 적용
+    // 전체 키캡에 색상 적용
     for (let i = 0; i < 6; i++) {
 
         const cap = capModels[i];
 
-        if (!cap)
-            continue;
+        if (!cap) continue;
 
         cap.traverse((child) => {
 
-            if (!child.isMesh)
-                return;
+            if (!child.isMesh) return;
 
-            if (!child.material)
-                return;
+            // 흰색 외곽선은 색상 변경에서 제외
+            if (child.userData.isFomoraCapOutline) return;
 
-            child.material.color.set(color);
+            if (!child.material) return;
+
+            const materials = Array.isArray(child.material)
+                ? child.material
+                : [child.material];
+
+            materials.forEach((material) => {
+                if (material.color) {
+                    material.color.set(color);
+                }
+            });
 
         });
-
     }
 
-    // 전체 색상 버튼 활성화
-    document
-        .querySelectorAll('.color')
-        .forEach(item => {
-            item.classList.remove('active');
-        });
+    // 색상 버튼 활성화
+    document.querySelectorAll('.color').forEach(item => {
+        item.classList.remove('active');
+    });
 
     if (element) {
         element.classList.add('active');
     }
 
+    // 현재 선택된 키캡의 외곽선 갱신
+    setSelectedCapOutline(selectedSlot);
 };
 
 
@@ -804,14 +808,19 @@ function applyCommonMaterial(
         return;
 
 
-    model.traverse(
-        object => {
+    
+model.traverse(
+    object => {
 
-            if (!object.isMesh)
-                return;
+        if (!object.isMesh)
+            return;
 
-            if (!object.material)
-                return;
+        // 외곽선은 키캡 색상 변경 대상에서 제외
+        if (object.userData.isFomoraCapOutline)
+            return;
+
+        if (!object.material)
+            return;
 
 
             if (
@@ -1296,10 +1305,12 @@ async function loadCaps(
         }
 
 
-        updateThreeKeyCaseVisibility();
+       updateThreeKeyCaseVisibility();
 
+// 현재 선택된 슬롯의 외곽선 갱신
+setSelectedCapOutline(selectedSlot);
 
-        await reloadSelectedSwitch();
+await reloadSelectedSwitch();
 
 
         fitCameraToProduct();
@@ -1443,13 +1454,287 @@ function(
 
     }
 
-    updateToppingUI();
 
+updateToppingUI();
+
+// 선택한 키캡에 흰색 외곽선 표시
+setSelectedCapOutline(selectedSlot);
 
 };
 
+// ============================================================
+// 3D 화면에서 키캡을 직접 눌러 슬롯 선택
+// - 짧은 탭/클릭만 선택으로 처리
+// - 드래그 회전은 OrbitControls가 기존처럼 처리
+// ============================================================
+(function enableDirectKeycapSelection() {
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+    let pointerStart = null;
+
+    // 키캡을 누를 때 살짝 내려갔다가 복귀하는 모션
+    const capPressStates = new WeakMap();
+    const PRESS_DISTANCE = 0.5;
+    const PRESS_IN_MS = 65;
+    const PRESS_OUT_MS = 150;
+
+    function getKeycapHit(clientX, clientY) {
+        const rect = renderer.domElement.getBoundingClientRect();
+        if (!rect.width || !rect.height) return null;
+
+        pointer.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+        pointer.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+        raycaster.setFromCamera(pointer, camera);
+
+        const visibleCaps = capModels
+            .map((model, slot) => ({ model, slot }))
+            .filter(item => item.model && item.model.visible);
+
+        let nearestHit = null;
+        for (const item of visibleCaps) {
+            const hits = raycaster.intersectObject(item.model, true);
+            if (hits.length && (!nearestHit || hits[0].distance < nearestHit.distance)) {
+                nearestHit = {
+                    model: item.model,
+                    slot: item.slot,
+                    distance: hits[0].distance
+                };
+            }
+        }
+        return nearestHit;
+    }
+
+    function animateCapPress(model) {
+    if (!model) return;
+
+    let state = capPressStates.get(model);
+
+    if (!state) {
+        state = {
+            baseZ: model.position.z,
+            animationId: null,
+            token: 0
+        };
+        capPressStates.set(model, state);
+    }
+
+    // 진행 중인 애니메이션 취소
+    if (state.animationId !== null) {
+        cancelAnimationFrame(state.animationId);
+        state.animationId = null;
+    }
+
+    state.token += 1;
+    const token = state.token;
+
+    // 현재 위치를 기준으로 움직여 위치가 튀는 현상 방지
+    const startZ = model.position.z;
+
+    // 이동 거리를 작게 설정
+    const PRESS_DISTANCE = 0.5;
+    const pressedZ = state.baseZ - PRESS_DISTANCE;
+    const pressStart = performance.now();
+
+    function pressFrame(now) {
+        if (state.token !== token) return;
+
+        const t = Math.min(1, (now - pressStart) / PRESS_IN_MS);
+        const eased = 1 - Math.pow(1 - t, 3);
+
+        model.position.z =
+            startZ + (pressedZ - startZ) * eased;
+
+        if (t < 1) {
+            state.animationId = requestAnimationFrame(pressFrame);
+        } else {
+            const releaseStart = performance.now();
+
+            function releaseFrame(releaseNow) {
+                if (state.token !== token) return;
+
+                const rt = Math.min(
+                    1,
+                    (releaseNow - releaseStart) / PRESS_OUT_MS
+                );
+
+                const springEase = 1 - Math.pow(1 - rt, 3);
+
+                model.position.z =
+                    pressedZ + (state.baseZ - pressedZ) * springEase;
+
+                if (rt < 1) {
+                    state.animationId =
+                        requestAnimationFrame(releaseFrame);
+                } else {
+                    model.position.z = state.baseZ;
+                    state.animationId = null;
+                }
+            }
+
+            state.animationId = requestAnimationFrame(releaseFrame);
+        }
+    }
+
+    state.animationId = requestAnimationFrame(pressFrame);
+}
+
+    renderer.domElement.addEventListener('pointerdown', (event) => {
+        pointerStart = {
+            x: event.clientX,
+            y: event.clientY,
+            pointerId: event.pointerId
+        };
+
+        // 누르는 순간 키캡에 눌림 모션 적용 (선택은 기존처럼 pointerup에서 처리)
+        const hit = getKeycapHit(event.clientX, event.clientY);
+        if (hit) animateCapPress(hit.model);
+    }, { passive: true });
+
+    renderer.domElement.addEventListener('pointerup', (event) => {
+        if (!pointerStart || pointerStart.pointerId !== event.pointerId) {
+            pointerStart = null;
+            return;
+        }
+
+        const movedX = event.clientX - pointerStart.x;
+        const movedY = event.clientY - pointerStart.y;
+        pointerStart = null;
+
+        // 카메라를 돌리거나 화면을 드래그한 동작은 슬롯 선택으로 처리하지 않음
+        if (Math.hypot(movedX, movedY) > 8) return;
+
+        const nearestHit = getKeycapHit(event.clientX, event.clientY);
+        if (!nearestHit) return;
+
+       const slotButtons = document.querySelectorAll('.slot');
+const slotButton = slotButtons[nearestHit.slot];
+
+if (slotButton) {
+    window.selectSlot(nearestHit.slot, slotButton);
+
+    // 선택된 캡에만 외곽선 표시
+    setSelectedCapOutline(nearestHit.slot);
+}
+    }, { passive: true });
+
+    renderer.domElement.addEventListener('pointercancel', () => {
+        pointerStart = null;
+    }, { passive: true });
+})();
 
 
+
+
+/* ==========================================
+   FOMORA 선택 키캡 외곽선
+   - 원래 키캡 색상 유지
+   - 선택된 슬롯에만 흰색 외곽선 표시
+   - 제품 본체와 별도로 렌더링하지 않음
+========================================== */
+
+const capOutlineMap = new WeakMap();
+
+function removeCapOutline(model) {
+    if (!model) return;
+
+    model.traverse((mesh) => {
+        if (!mesh.isMesh) return;
+
+        const outlines = mesh.children.filter(
+            child => child.userData.isFomoraCapOutline
+        );
+
+        outlines.forEach((outline) => {
+            mesh.remove(outline);
+
+            if (outline.geometry) {
+                outline.geometry.dispose();
+            }
+
+            if (outline.material) {
+                outline.material.dispose();
+            }
+        });
+    });
+
+    capOutlineMap.delete(model);
+}
+
+function createCapOutline(model) {
+    if (!model) return [];
+
+    const cached = capOutlineMap.get(model);
+    if (cached) return cached;
+
+    const meshes = [];
+
+    // 원본 키캡 메시만 수집
+    model.traverse((child) => {
+        if (
+            child.isMesh &&
+            child.geometry &&
+            !child.userData.isFomoraCapOutline
+        ) {
+            meshes.push(child);
+        }
+    });
+
+    const outlineMeshes = [];
+
+    meshes.forEach((mesh) => {
+
+        // 외곽선 전용 흰색 재질
+        const material = new THREE.MeshBasicMaterial({
+            color: 0xffffff,
+            side: THREE.BackSide,
+            depthTest: true,
+            depthWrite: false,
+            toneMapped: false
+        });
+
+        // 원본 지오메트리를 복제해 별도로 관리
+        const outline = new THREE.Mesh(
+            mesh.geometry.clone(),
+            material
+        );
+
+        // 외곽선 두께
+        outline.scale.setScalar(1.04);
+
+        outline.visible = false;
+        outline.renderOrder = 2;
+
+        // 외곽선이 클릭 판정을 가로채지 않도록 설정
+        outline.raycast = () => {};
+
+        // 색상 변경 코드에서 구분하기 위한 표시
+        outline.userData.isFomoraCapOutline = true;
+
+        mesh.add(outline);
+
+        outlineMeshes.push(outline);
+    });
+
+    capOutlineMap.set(model, outlineMeshes);
+
+    return outlineMeshes;
+}
+
+function setSelectedCapOutline(slot) {
+    capModels.forEach((model, index) => {
+        if (!model) return;
+
+        const outlines = createCapOutline(model);
+
+        const shouldShow =
+            index === slot &&
+            model.visible;
+
+        outlines.forEach((outline) => {
+            outline.visible = shouldShow;
+        });
+    });
+}
 
 // ============================================================
 // 토핑 UI 스타일
