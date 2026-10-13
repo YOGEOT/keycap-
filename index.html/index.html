@@ -717,7 +717,78 @@
 
 
 
-        
+        <!-- ==================================================
+             KEY
+        ================================================== -->
+
+        <div class="section">
+
+            <div class="section-title">
+                키캡
+            </div>
+
+
+            <div class="slot-grid">
+
+
+                <div
+                    class="slot active"
+                    onclick="selectSlot(0, this)"
+                >
+                    KEY 1
+                </div>
+
+
+                <div
+                    class="slot"
+                    onclick="selectSlot(1, this)"
+                >
+                    KEY 2
+                </div>
+
+
+                <div
+                    class="slot"
+                    onclick="selectSlot(2, this)"
+                >
+                    KEY 3
+                </div>
+
+
+                <div
+                    class="slot"
+                    onclick="selectSlot(3, this)"
+                >
+                    KEY 4
+                </div>
+
+
+                <div
+                    class="slot"
+                    onclick="selectSlot(4, this)"
+                >
+                    KEY 5
+                </div>
+
+
+                <div
+                    class="slot"
+                    onclick="selectSlot(5, this)"
+                >
+                    KEY 6
+                </div>
+
+
+            </div>
+
+
+            <div class="selected-slot-info">
+                선택된 위치 : KEY 1
+            </div>
+
+        </div>
+
+
 
         <!-- ==================================================
              케이스 색상
@@ -2512,6 +2583,7 @@
 
 
 
+
 <script>
 (() => {
     const panel = document.querySelector('.panel');
@@ -2534,70 +2606,90 @@
     let keycapColorItem = null;
     let partsItem = null;
 
-    
-sections.forEach((section, index) => {
-    const heading = section.querySelector('.section-title');
+    sections.forEach((section, index) => {
+        const heading = section.querySelector('.section-title');
 
-    const label = heading
-        ? heading.textContent.trim()
-        : section.classList.contains('price-box')
-            ? '가격'
-            : null;
+        const label = heading
+            ? heading.textContent.trim()
+            : section.classList.contains('price-box')
+                ? '가격'
+                : null;
 
-    if (!label) return;
+        if (!label) return;
 
-    // 키캡 슬롯 선택 섹션은 탭 목록에서 제외
-// 실제 섹션은 삭제하지 않음 (PC에서는 유지)
-if (label === '키캡') {
-    return;
-}
-
-    // 파츠 섹션은 파츠 탭으로 유지
-    if (label.includes('파츠')) {
-        if (!partsItem) {
-            partsItem = {
-                sections: [],
-                index,
-                label: '파츠'
-            };
-
-            items.push(partsItem);
+        // 키캡 슬롯 선택 섹션은 탭에서 제외
+        // PC 화면의 섹션은 그대로 유지
+        if (label === '키캡') {
+            return;
         }
 
-        partsItem.sections.push(section);
-        return;
-    }
+        // 개별 키캡 색상과 전체 키캡 색상을 하나의 탭으로 통합
+        if (
+            label === '키캡 색상' ||
+            label === '전체 키캡 색상'
+        ) {
+            if (!keycapColorItem) {
+                keycapColorItem = {
+                    sections: [],
+                    index,
+                    label: '키캡 색상'
+                };
 
-    // 나머지 옵션은 각각 별도 탭으로 유지
-    items.push({
-        sections: [section],
-        index,
-        label
+                items.push(keycapColorItem);
+            }
+
+            keycapColorItem.sections.push(section);
+            return;
+        }
+
+        // 파츠 섹션은 기존 파츠 탭으로 유지
+        if (label.includes('파츠')) {
+            if (!partsItem) {
+                partsItem = {
+                    sections: [],
+                    index,
+                    label: '파츠'
+                };
+
+                items.push(partsItem);
+            }
+
+            partsItem.sections.push(section);
+            return;
+        }
+
+        // 그 외 섹션은 각각 기존 탭으로 유지
+        items.push({
+            sections: [section],
+            index,
+            label
+        });
     });
-});
 
     if (!items.length) return;
 
     let activeIndex = 0;
     const mediaQuery = window.matchMedia('(max-width: 900px)');
 
-    // 파츠 탭 안에서 토핑 섹션을 가장 위로 표시
-const partsTab = items.find(item => item.label === '파츠');
+    // 파츠 탭 안에서는 토핑 섹션이 있다면 위쪽에 표시
+    const partsTab = items.find(item => item.label === '파츠');
 
-if (partsTab) {
-    partsTab.sections.sort((a, b) => {
-        const aIsTopping =
-            a.querySelector('.section-title')?.textContent.trim() === '토핑';
-        const bIsTopping =
-            b.querySelector('.section-title')?.textContent.trim() === '토핑';
+    if (partsTab) {
+        partsTab.sections.sort((a, b) => {
+            const aIsTopping =
+                a.querySelector('.section-title')?.textContent.trim() === '토핑';
 
-        return Number(bIsTopping) - Number(aIsTopping);
-    });
-}
+            const bIsTopping =
+                b.querySelector('.section-title')?.textContent.trim() === '토핑';
+
+            return Number(bIsTopping) - Number(aIsTopping);
+        });
+    }
 
     // 탭 버튼 생성
     items.forEach((item, tabIndex) => {
         const button = document.createElement('button');
+
         button.type = 'button';
         button.className = 'mobile-option-tab';
         button.textContent = item.label;
@@ -2623,21 +2715,23 @@ if (partsTab) {
     function updateLayout(scrollToTab = false) {
         const mobile = mediaQuery.matches;
 
+        // 모든 섹션의 기존 모바일 표시 상태 초기화
         sections.forEach(section => {
-    section.classList.remove(
-        'mobile-section-active',
-        'mobile-section-hidden'
-    );
+            section.classList.remove(
+                'mobile-section-active',
+                'mobile-section-hidden'
+            );
 
-    const heading = section.querySelector('.section-title');
-    const label = heading ? heading.textContent.trim() : '';
+            const heading = section.querySelector('.section-title');
+            const label = heading ? heading.textContent.trim() : '';
 
-    // 키캡 슬롯 선택 영역은 모바일에서만 숨김
-    if (mobile && label === '키캡') {
-        section.classList.add('mobile-section-hidden');
-    }
-});
+            // 키캡 슬롯 선택 영역은 모바일에서만 숨김
+            if (mobile && label === '키캡') {
+                section.classList.add('mobile-section-hidden');
+            }
+        });
 
+        // 선택된 탭에 연결된 섹션 표시
         items.forEach((item, tabIndex) => {
             const active = tabIndex === activeIndex;
             const button = tabs.children[tabIndex];
@@ -2651,6 +2745,7 @@ if (partsTab) {
                         'mobile-section-active',
                         active
                     );
+
                     section.classList.toggle(
                         'mobile-section-hidden',
                         !active
@@ -2670,8 +2765,10 @@ if (partsTab) {
         }
     }
 
+    // 최초 레이아웃 적용
     updateLayout();
 
+    // 모바일과 PC 화면 크기 전환 대응
     if (mediaQuery.addEventListener) {
         mediaQuery.addEventListener('change', () => updateLayout());
     } else {
