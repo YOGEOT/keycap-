@@ -2646,17 +2646,18 @@
             return;
         }
 
-        // 키캡 탭은 목록에서 제외
-if (label === '키캡') {
-    return;
-}
+                // 키캡 탭은 목록에서 제외
+        if (label === '키캡') {
+            return;
+        }
 
-// 나머지는 개별 탭
-items.push({
-    sections: [section],
-    index,
-    label
-});
+        // 나머지는 개별 탭
+        items.push({
+            sections: [section],
+            index,
+            label
+        });
+    }); // sections.forEach 종료
 
     if (!items.length) return;
 
