@@ -1521,7 +1521,7 @@ let pointerDownHit = null;
     const startZ = model.position.z;
 
     // 이동 거리를 작게 설정
-    const PRESS_DISTANCE = 0.5;
+    const PRESS_DISTANCE = 2;
     const pressedZ = state.baseZ - PRESS_DISTANCE;
     const pressStart = performance.now();
 
