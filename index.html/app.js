@@ -179,19 +179,16 @@ arrowDirections.forEach(direction => {
     button.setAttribute('aria-label', direction.label);
 
 const icon = document.createElement('img');
+
 console.log('화살표 이미지 코드 실행됨');
-icon.src = `/icons/${direction.symbol}`;
+
+const iconBasePath = window.location.hostname.endsWith('github.io')
+    ? '/keycap-/icons/'
+    : '/icons/';
+
+icon.src = `${iconBasePath}${direction.symbol}`;
 icon.alt = '';
-
-icon.onload = () => {
-    console.log('화살표 이미지 로드 성공:', icon.src);
-};
-
-icon.onerror = () => {
-    console.error('화살표 이미지 로드 실패:', icon.src);
-};
 icon.draggable = false;
-
 Object.assign(icon.style, {
     width: '100px',
     height: '100px',
