@@ -62,6 +62,294 @@ container.appendChild(
 );
 
 
+/* ============================================================
+   선택한 키캡 주변의 방향 화살표
+============================================================ */
+
+
+const arrowStyle = document.createElement('style');
+
+// ============================================================
+// FOMORA 회전 화살표 디자인 설정
+// ============================================================
+
+// 화살표 색상: 원하는 색상 코드로 직접 변경
+const ROTATE_ARROW_COLOR = '#c0c0c0';
+
+// 마우스를 올렸을 때 화살표 색상
+const ROTATE_ARROW_HOVER_COLOR = '#333333';
+
+// 화살표 크기
+const ROTATE_ARROW_SIZE = 25;
+
+// 화살표 두께
+const ROTATE_ARROW_WEIGHT = 400;
+
+arrowStyle.textContent = `
+    #canvas-container {
+        position: relative;
+    }
+
+    .fomora-rotate-arrow {
+        position: absolute;
+        z-index: 20;
+
+        width: ${ROTATE_ARROW_SIZE}px;
+        height: ${ROTATE_ARROW_SIZE}px;
+
+        padding: 0;
+        margin: 0;
+
+        border: none;
+        outline: none;
+        background: transparent;
+        box-shadow: none;
+
+        color: ${ROTATE_ARROW_COLOR};
+        font-family: Arial, sans-serif;
+        font-size: ${ROTATE_ARROW_SIZE}px;
+        font-weight: ${ROTATE_ARROW_WEIGHT};
+        line-height: 1;
+
+        display: none;
+        align-items: center;
+        justify-content: center;
+
+        cursor: pointer;
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+
+        transition:
+            color 0.18s ease,
+            opacity 0.18s ease,
+            transform 0.18s ease;
+    }
+
+    .fomora-rotate-arrow:hover {
+        color: ${ROTATE_ARROW_HOVER_COLOR};
+        background: transparent;
+        box-shadow: none;
+        transform: scale(1.12);
+    }
+
+    .fomora-rotate-arrow:active {
+        transform: scale(0.90);
+    }
+
+    .fomora-rotate-arrow:focus-visible {
+        outline: 1px solid currentColor;
+        outline-offset: 2px;
+        border-radius: 4px;
+    }
+`;
+
+document.head.appendChild(arrowStyle);
+
+
+// 화살표를 담는 영역
+const rotateArrowGroup = document.createElement('div');
+
+rotateArrowGroup.id = 'fomora-rotate-arrows';
+
+Object.assign(rotateArrowGroup.style, {
+    position: 'absolute',
+    inset: '0',
+    pointerEvents: 'none',
+    zIndex: '20'
+});
+
+container.appendChild(rotateArrowGroup);
+
+// 동서남북 화살표 생성
+const rotateArrowButtons = {};
+
+const arrowDirections = [
+    { name: 'north', symbol: 'north.png', label: '북쪽' },
+    { name: 'south', symbol: 'south.png', label: '남쪽' },
+    { name: 'east',  symbol: 'east.png',  label: '동쪽' },
+    { name: 'west',  symbol: 'west.png',  label: '서쪽' }
+];
+
+arrowDirections.forEach(direction => {
+    const button = document.createElement('button');
+
+    button.type = 'button';
+    button.className = 'fomora-rotate-arrow';
+    button.setAttribute('aria-label', direction.label);
+
+const icon = document.createElement('img');
+console.log('화살표 이미지 코드 실행됨');
+icon.src = `/icons/${direction.symbol}`;
+icon.alt = '';
+icon.draggable = false;
+
+Object.assign(icon.style, {
+    width: '100px',
+    height: '100px',
+    minWidth: '24px',
+    minHeight: '24px',
+    objectFit: 'contain',
+    display: 'block',
+    pointerEvents: 'none',
+    flexShrink: '0'
+});
+
+button.appendChild(icon);
+
+    // 각 화살표 클릭 기능은 다음 단계에서 연결합니다.
+    
+
+
+button.addEventListener('click', event => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const slot = selectedSlot;
+    const partModel = partModels[slot];
+
+    if (!partModel || !selectedParts[slot]) {
+        return;
+    }
+
+    // 각 방향에 해당하는 Z축 목표 각도
+    const rotationMap = {
+        north: -180,
+        south: 0,
+        east: 90,
+        west: -90
+    };
+
+    const targetAngle = rotationMap[direction.name];
+
+    if (targetAngle === undefined) {
+        return;
+    }
+
+    // 누적 회전이 아닌 목표 각도로 직접 설정
+    setPartRotationAroundCenter(
+        partModel,
+        'z',
+        targetAngle
+    );
+
+    updateRotateArrowPosition();
+});
+
+
+
+
+    rotateArrowGroup.appendChild(button);
+
+    rotateArrowButtons[direction.name] = button;
+});
+
+
+
+
+/* ============================================================
+   선택한 키캡 위치에 화살표 배치
+   - 키캡의 화면상 크기에 맞춰 화살표 간격 조절
+   - 확대 / 축소 시 위치 갱신
+============================================================ */
+
+
+
+/* ============================================================
+   선택한 키캡 주변에 화살표 배치
+   - 화살표 위치는 3D 공간 기준
+   - 확대 / 축소 시 간격이 함께 변경
+   - 아이콘 크기는 기존 CSS 설정 유지
+============================================================ */
+
+function updateRotateArrowPosition() {
+    const cap = capModels[selectedSlot];
+
+    // 키캡이 없으면 화살표 숨기기
+    if (!cap) {
+        Object.values(rotateArrowButtons).forEach(button => {
+            button.style.display = 'none';
+        });
+        return;
+    }
+
+    const box = new THREE.Box3().setFromObject(cap);
+
+    if (box.isEmpty()) {
+        Object.values(rotateArrowButtons).forEach(button => {
+            button.style.display = 'none';
+        });
+        return;
+    }
+
+    // 키캡 중심과 크기
+    const center = box.getCenter(new THREE.Vector3());
+    const size = box.getSize(new THREE.Vector3());
+
+    // 키캡 크기를 기준으로 3D 공간상의 간격 결정
+    const gapX = size.x * 0.3;
+    const gapY = size.y * 0.3;
+
+    // 화살표가 위치할 3D 좌표
+    const positions3D = {
+        north: new THREE.Vector3(
+            center.x,
+            center.y + size.y / 2 + gapY,
+            center.z +2
+        ),
+        south: new THREE.Vector3(
+            center.x,
+            center.y - size.y / 2 - gapY,
+            center.z +2
+        ),
+        east: new THREE.Vector3(
+            center.x + size.x / 2 + gapX,
+            center.y,
+            center.z +2
+        ),
+        west: new THREE.Vector3(
+            center.x - size.x / 2 - gapX,
+            center.y,
+            center.z +2
+        )
+    };
+
+    // 3D 좌표를 화면 좌표로 변환
+    const rect = renderer.domElement.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+
+    Object.entries(positions3D).forEach(([name, position]) => {
+        const button = rotateArrowButtons[name];
+
+        if (!button) return;
+
+        const screenPosition = position.project(camera);
+
+        // 카메라 뒤에 있는 화살표는 숨김
+        if (screenPosition.z < -1 || screenPosition.z > 1) {
+            button.style.display = 'none';
+            return;
+        }
+
+        const x =
+            rect.left - containerRect.left +
+            (screenPosition.x * 0.5 + 0.5) * rect.width;
+
+        const y =
+            rect.top - containerRect.top +
+            (-screenPosition.y * 0.5 + 0.5) * rect.height;
+
+        button.style.display = 'flex';
+        button.style.left = `${x - ROTATE_ARROW_SIZE / 2}px`;
+        button.style.top = `${y - ROTATE_ARROW_SIZE / 2}px`;
+        button.style.pointerEvents = 'auto';
+    });
+}
+
+
+
+
+
 // ============================================================
 // Light
 // ============================================================
@@ -1448,6 +1736,7 @@ window.selectSlot = function(slot, element) {
     // 토핑 UI 및 키캡 외곽선 갱신
     updateToppingUI();
     setSelectedCapOutline(selectedSlot);
+    updateRotateArrowPosition();
 };
 
 // ============================================================
@@ -2875,6 +3164,218 @@ async function(
 };
 
 
+/* ============================================================
+   선택한 KEY의 파츠 방향 회전 버튼
+   - 위/아래: X축 기준 90도 회전
+   - 왼쪽/오른쪽: Y축 기준 90도 회전
+   - 선택한 파츠만 회전
+============================================================ */
+
+function createPartRotationUI() {
+    if (document.getElementById('fomora-part-rotation')) return;
+
+    const style = document.createElement('style');
+    style.id = 'fomora-part-rotation-style';
+    style.textContent = `
+        #fomora-part-rotation {
+            margin: 16px 0;
+            padding: 14px;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            background: #fff;
+            color: #333;
+        }
+
+        #fomora-part-rotation .rotation-title {
+            margin: 0 0 6px;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        #fomora-part-rotation .rotation-info {
+            margin: 0 0 12px;
+            color: #777;
+            font-size: 12px;
+        }
+
+        #fomora-part-rotation .rotation-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            max-width: 220px;
+            margin: 0 auto;
+        }
+
+        #fomora-part-rotation button {
+            min-height: 44px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fff;
+            color: #333;
+            font-size: 20px;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        #fomora-part-rotation button:active {
+            background: #eee;
+        }
+
+        #fomora-part-rotation .rotation-reset {
+            grid-column: 2;
+            font-size: 12px;
+        }
+    `;
+    document.head.appendChild(style);
+
+    const panel = document.createElement('section');
+    panel.id = 'fomora-part-rotation';
+
+    panel.innerHTML = `
+        <h3 class="rotation-title">파츠 방향 전환</h3>
+        <p class="rotation-info">
+            현재 선택한 KEY의 파츠만 90° 회전합니다.
+        </p>
+
+        <div class="rotation-grid">
+            <span></span>
+            <button type="button" data-rotate-axis="x" data-rotate-step="-90"
+                aria-label="위쪽 방향 회전">↑</button>
+            <span></span>
+
+            <button type="button" data-rotate-axis="y" data-rotate-step="-90"
+                aria-label="왼쪽 방향 회전">←</button>
+            <button type="button" class="rotation-reset"
+                data-rotate-reset="true">초기화</button>
+            <button type="button" data-rotate-axis="y" data-rotate-step="90"
+                aria-label="오른쪽 방향 회전">→</button>
+
+            <span></span>
+            <button type="button" data-rotate-axis="x" data-rotate-step="90"
+                aria-label="아래쪽 방향 회전">↓</button>
+            <span></span>
+        </div>
+    `;
+
+    const panelContainer = document.querySelector('.panel');
+
+    if (!panelContainer) {
+        console.error('파츠 회전 UI: .panel 요소를 찾을 수 없습니다.');
+        return;
+    }
+
+    const partsSection = Array.from(
+        panelContainer.querySelectorAll(':scope > .section')
+    ).find(section =>
+        section.querySelector('.section-title')
+            ?.textContent.trim() === '파츠'
+    );
+
+    if (!partsSection) {
+        console.error('파츠 회전 UI: 파츠 섹션을 찾을 수 없습니다.');
+        return;
+    }
+
+    partsSection.appendChild(panel);
+
+    // 각 슬롯의 회전값을 따로 저장
+    const rotationValues = Array.from(
+        { length: 6 },
+        () => ({ x: 0, y: 0 })
+    );
+
+    panel.addEventListener('click', event => {
+        const button = event.target.closest('button');
+        if (!button) return;
+
+        const slot = selectedSlot;
+        const model = partModels[slot];
+
+        if (!model || !selectedParts[slot]) {
+            alert('먼저 파츠를 선택해 주세요.');
+            return;
+        }
+
+        if (button.dataset.rotateReset === 'true') {
+            const saved = rotationValues[slot];
+
+            // 저장된 회전값만큼 역회전하여 초기 상태로 복귀
+            rotatePartAroundCenter(model, 'x', -saved.x);
+            rotatePartAroundCenter(model, 'y', -saved.y);
+
+            saved.x = 0;
+            saved.y = 0;
+            return;
+        }
+
+        const axis = button.dataset.rotateAxis;
+        const step = Number(button.dataset.rotateStep);
+
+        if (!['x', 'y'].includes(axis) || !Number.isFinite(step)) {
+            return;
+        }
+
+        rotatePartAroundCenter(model, axis, step);
+        rotationValues[slot][axis] += step;
+    });
+}
+
+// 파츠의 바운딩 박스 중심을 유지하면서 회전
+function rotatePartAroundCenter(model, axis, degrees) {
+    if (!model) return;
+
+    model.updateWorldMatrix(true, true);
+
+    const beforeCenter = new THREE.Box3()
+        .setFromObject(model)
+        .getCenter(new THREE.Vector3());
+
+    model.rotation[axis] += THREE.MathUtils.degToRad(degrees);
+    model.updateWorldMatrix(true, true);
+
+    const afterCenter = new THREE.Box3()
+        .setFromObject(model)
+        .getCenter(new THREE.Vector3());
+
+    model.position.add(beforeCenter.sub(afterCenter));
+    model.updateWorldMatrix(true, true);
+}
+
+
+
+ // 목표 각도로 회전하면서 파츠의 중심 유지
+function setPartRotationAroundCenter(model, axis, degrees) {
+    if (!model) return;
+
+    model.updateWorldMatrix(true, true);
+
+    // 회전 전 중심 좌표 저장
+    const beforeCenter = new THREE.Box3()
+        .setFromObject(model)
+        .getCenter(new THREE.Vector3());
+
+    // 누적하지 않고 지정한 각도로 설정
+    model.rotation[axis] =
+        THREE.MathUtils.degToRad(degrees);
+
+    model.updateWorldMatrix(true, true);
+
+    // 회전 후 중심 좌표 계산
+    const afterCenter = new THREE.Box3()
+        .setFromObject(model)
+        .getCenter(new THREE.Vector3());
+
+    // 회전 전후 중심 차이 보정
+    model.position.add(
+        beforeCenter.sub(afterCenter)
+    );
+
+    model.updateWorldMatrix(true, true);
+}
+
+
+
+
 // ============================================================
 // 축 제거
 // ============================================================
@@ -3454,6 +3955,8 @@ async function init() {
 
     createToppingUI();
 
+    createPartRotationUI();
+
 
     await loadCaps(
         'A'
@@ -3518,6 +4021,8 @@ function animate() {
 
 
     controls.update();
+
+    updateRotateArrowPosition();
 
 
     renderer.render(
