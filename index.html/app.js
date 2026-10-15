@@ -143,18 +143,18 @@ arrowStyle.textContent = `
         border-radius: 4px;
     }
 
-     @media (max-width: 768px) {
-        .fomora-rotate-arrow {
-            width: 40px !important;
-            height: 40px !important;
-            font-size: 40px !important;
-        }
-
-        .fomora-rotate-arrow img {
-            width: 40px !important;
-            height: 40px !important;
-        }
+    @media (max-width: 768px) {
+    .fomora-rotate-arrow {
+        width: 25px !important;
+        height: 25px !important;
+        font-size: 40px !important;
     }
+
+    .fomora-rotate-arrow img {
+        width: 40px !important;
+        height: 40px !important;
+    }
+}
 `;
 
 document.head.appendChild(arrowStyle);
