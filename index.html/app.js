@@ -695,6 +695,12 @@ const PARTS = {
         file: 'wafle.glb',
         name: '와플',
         price: 1000
+    },
+
+     cut_strawberry: {
+        file: 'cut_strawberry.glb',
+        name: '딸기단면',
+        price: 800
     }
 
 };
@@ -837,6 +843,8 @@ const ALL_PART_PRICES = {
     'peach.all': 2000,
 
     'apple.all': 2000,
+
+    'cut_strawberry.all': 2000,
 
     'egg.all': 4000,
 
