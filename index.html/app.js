@@ -282,9 +282,10 @@ button.addEventListener('click', event => {
 
 function updateRotateArrowPosition() {
     const cap = capModels[selectedSlot];
+    const part = partModels[selectedSlot];
 
-    // 키캡이 없으면 화살표 숨기기
-    if (!cap) {
+    // 현재 슬롯에 파츠가 없으면 화살표 숨기기
+    if (!cap || !part || !selectedParts[selectedSlot]) {
         Object.values(rotateArrowButtons).forEach(button => {
             button.style.display = 'none';
         });
@@ -719,7 +720,14 @@ const TOPPINGS = {
         file: 'topping_whipcream.glb',
         name: '생크림 토핑',
         price: 800
+    },
+
+    narutomaki: {
+        file: 'topping_narutomaki.glb',
+        name: '나루토마키 토핑',
+        price: 600
     }
+
 };
 
 
@@ -2147,7 +2155,7 @@ function createToppingUI() {
     panel.id = 'fomora-topping-panel';
 
     panel.innerHTML = `
-        <h3 class="topping-title">토핑(와플,마카롱)</h3>
+        <h3 class="topping-title">토핑(와플,마카롱,라면)</h3>
 
         <p class="topping-description">
             현재 선택한 KEY에만 토핑이 적용됩니다.
@@ -2630,16 +2638,28 @@ function moveToppingToSlot(toppingModel, slot) {
     const parent = toppingModel.parent;
     if (!parent) return;
 
-    // 최초 위치 저장
-    if (!toppingModel.userData.originalPosition) {
-        toppingModel.userData.originalPosition =
-            toppingModel.position.clone();
-    }
+    // 최초 위치와 회전값 저장
+if (!toppingModel.userData.originalPosition) {
+    toppingModel.userData.originalPosition =
+        toppingModel.position.clone();
 
-    // 매번 최초 위치에서 다시 계산
-    toppingModel.position.copy(
-        toppingModel.userData.originalPosition
-    );
+    toppingModel.userData.originalQuaternion =
+        toppingModel.quaternion.clone();
+}
+
+// 토핑 위치 초기화
+toppingModel.position.copy(
+    toppingModel.userData.originalPosition
+);
+
+// 토핑 회전값 초기화
+toppingModel.quaternion.copy(
+    toppingModel.userData.originalQuaternion
+);
+
+// 행렬 갱신
+toppingModel.updateMatrixWorld(true);
+productGroup.updateMatrixWorld(true);
 
     productGroup.updateMatrixWorld(true);
 
@@ -2696,7 +2716,8 @@ function moveToppingToSlot(toppingModel, slot) {
 const toppingHeightAdjust = {
     strawberry: -3,
     cream: -0.5,
-    whipcream: -1.2
+    whipcream: -1.2,
+    narutomaki: -0.5
 };
 
 const toppingName = selectedToppings[slot];
@@ -3338,58 +3359,158 @@ function createPartRotationUI() {
     });
 }
 
-// 파츠의 바운딩 박스 중심을 유지하면서 회전
+
+/* ============================================================
+   파츠 회전 시 해당 슬롯의 토핑도 함께 회전
+============================================================ */
+
+// 토핑을 파츠의 회전 중심을 기준으로 이동하고 방향도 회전
+function rotateToppingWithPart(slot, pivotWorld, deltaQuaternion) {
+    const topping = toppingModels[slot];
+
+    if (!topping || !topping.parent) return;
+
+    const parent = topping.parent;
+
+    parent.updateWorldMatrix(true, false);
+    topping.updateWorldMatrix(true, true);
+
+    // 토핑의 현재 월드 위치
+    const worldPosition = topping.getWorldPosition(
+        new THREE.Vector3()
+    );
+
+    // 파츠 중심을 기준으로 토핑 위치 회전
+    worldPosition
+        .sub(pivotWorld)
+        .applyQuaternion(deltaQuaternion)
+        .add(pivotWorld);
+
+    // 토핑의 현재 월드 방향
+    const worldQuaternion = topping.getWorldQuaternion(
+        new THREE.Quaternion()
+    );
+
+    // 파츠의 회전량을 토핑 방향에도 적용
+    worldQuaternion.premultiply(deltaQuaternion);
+
+    // 월드 좌표를 부모 기준 로컬 좌표로 변환
+    const localPosition = parent.worldToLocal(
+        worldPosition.clone()
+    );
+
+    const parentWorldQuaternion = parent.getWorldQuaternion(
+        new THREE.Quaternion()
+    );
+
+    const localQuaternion = parentWorldQuaternion
+        .invert()
+        .multiply(worldQuaternion);
+
+    topping.position.copy(localPosition);
+    topping.quaternion.copy(localQuaternion);
+
+    topping.updateWorldMatrix(true, true);
+}
+
+
+// ============================================================
+// 파츠 회전: 기존 회전량만큼 추가 회전
+// ============================================================
+
 function rotatePartAroundCenter(model, axis, degrees) {
     if (!model) return;
 
     model.updateWorldMatrix(true, true);
 
+    const slot = partModels.indexOf(model);
+
     const beforeCenter = new THREE.Box3()
         .setFromObject(model)
         .getCenter(new THREE.Vector3());
 
+    const beforeQuaternion = model.getWorldQuaternion(
+        new THREE.Quaternion()
+    );
+
     model.rotation[axis] += THREE.MathUtils.degToRad(degrees);
+
     model.updateWorldMatrix(true, true);
 
     const afterCenter = new THREE.Box3()
         .setFromObject(model)
         .getCenter(new THREE.Vector3());
 
-    model.position.add(beforeCenter.sub(afterCenter));
+    model.position.add(beforeCenter.clone().sub(afterCenter));
+
     model.updateWorldMatrix(true, true);
+
+    const afterQuaternion = model.getWorldQuaternion(
+        new THREE.Quaternion()
+    );
+
+    const deltaQuaternion = afterQuaternion.clone()
+        .multiply(beforeQuaternion.clone().invert());
+
+    if (slot !== -1) {
+        rotateToppingWithPart(
+            slot,
+            beforeCenter,
+            deltaQuaternion
+        );
+    }
 }
 
 
+// ============================================================
+// 파츠 회전: 지정한 목표 각도로 설정
+// ============================================================
 
- // 목표 각도로 회전하면서 파츠의 중심 유지
 function setPartRotationAroundCenter(model, axis, degrees) {
     if (!model) return;
 
     model.updateWorldMatrix(true, true);
 
-    // 회전 전 중심 좌표 저장
+    const slot = partModels.indexOf(model);
+
     const beforeCenter = new THREE.Box3()
         .setFromObject(model)
         .getCenter(new THREE.Vector3());
 
-    // 누적하지 않고 지정한 각도로 설정
+    const beforeQuaternion = model.getWorldQuaternion(
+        new THREE.Quaternion()
+    );
+
+    // 기존 각도에 누적하지 않고 목표 각도로 설정
     model.rotation[axis] =
         THREE.MathUtils.degToRad(degrees);
 
     model.updateWorldMatrix(true, true);
 
-    // 회전 후 중심 좌표 계산
     const afterCenter = new THREE.Box3()
         .setFromObject(model)
         .getCenter(new THREE.Vector3());
 
-    // 회전 전후 중심 차이 보정
-    model.position.add(
-        beforeCenter.sub(afterCenter)
-    );
+    model.position.add(beforeCenter.clone().sub(afterCenter));
 
     model.updateWorldMatrix(true, true);
+
+    const afterQuaternion = model.getWorldQuaternion(
+        new THREE.Quaternion()
+    );
+
+    const deltaQuaternion = afterQuaternion.clone()
+        .multiply(beforeQuaternion.clone().invert());
+
+    if (slot !== -1) {
+        rotateToppingWithPart(
+            slot,
+            beforeCenter,
+            deltaQuaternion
+        );
+    }
 }
+
 
 
 
