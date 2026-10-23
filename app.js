@@ -728,6 +728,7 @@ const COLORABLE_PARTS = {
         colors: [
             { name: '블랙', value: '#454545' },
             { name: '화이트', value: '#F2F0EB' },
+            { name: '그레이', value: '#8f8f8f' },
             { name: '핑크', value: '#E8B7C3' },
             { name: '블루', value: '#809ecc' },
             { name: '옐로우', value: '#E8D28B' },
