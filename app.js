@@ -707,8 +707,196 @@ const PARTS = {
         file: 'cut_strawberry.glb',
         name: '딸기단면',
         price: 800
+    },
+
+    Button: {
+        file: 'Button.glb',
+        name: '단추',
+        price: 500
     }
 
+};
+
+
+/* ============================================================
+   색상 변경 대상 파츠 설정
+============================================================ */
+
+const COLORABLE_PARTS = {
+    Button: {
+        defaultColor: '#BA3F3F',
+        colors: [
+            { name: '블랙', value: '#454545' },
+            { name: '화이트', value: '#F2F0EB' },
+            { name: '핑크', value: '#E8B7C3' },
+            { name: '블루', value: '#809ecc' },
+            { name: '옐로우', value: '#E8D28B' },
+            { name: '그린', value: '#A9BCA0' },
+            { name: '브라운', value: '#755833' },
+           
+        ]
+    }
+};
+
+const selectedPartColors = Array(6).fill(null);
+
+// ============================================================
+// 슬롯별 파츠 원본 색상 저장
+// ============================================================
+
+const originalPartColors = new WeakMap();
+
+function saveOriginalPartColors(model) {
+    if (!model || originalPartColors.has(model)) return;
+
+    const savedMeshes = [];
+
+    model.traverse((object) => {
+        if (!object.isMesh || !object.material) return;
+
+        const materials = Array.isArray(object.material)
+            ? object.material
+            : [object.material];
+
+        savedMeshes.push({
+            object: object,
+            materials: materials.map((material) => ({
+                color: material.color
+                    ? material.color.clone()
+                    : null
+            }))
+        });
+    });
+
+    originalPartColors.set(model, savedMeshes);
+}
+
+function restoreOriginalPartColors(model) {
+    if (!model) return;
+
+    const savedMeshes = originalPartColors.get(model);
+
+    if (!savedMeshes) {
+        console.warn('원본 색상 저장 정보를 찾을 수 없습니다.');
+        return;
+    }
+
+    savedMeshes.forEach((saved) => {
+        const object = saved.object;
+        if (!object || !object.material) return;
+
+        const currentMaterials = Array.isArray(object.material)
+            ? object.material
+            : [object.material];
+
+        currentMaterials.forEach((material, index) => {
+            const original = saved.materials[index];
+
+            if (material.color && original?.color) {
+                material.color.copy(original.color);
+            }
+        });
+    });
+}
+
+function applySelectedPartColor(model, color) {
+    if (!model || !color) return;
+
+    model.traverse((object) => {
+        if (!object.isMesh || !object.material) return;
+
+        // 기존 재질을 복제해 다른 슬롯에 영향을 주지 않도록 함
+        if (Array.isArray(object.material)) {
+            object.material = object.material.map(material => {
+                const cloned = material.clone();
+                if (cloned.color) cloned.color.set(color);
+                return cloned;
+            });
+        } else {
+            object.material = object.material.clone();
+            if (object.material.color) {
+                object.material.color.set(color);
+            }
+        }
+    });
+}
+
+function updatePartColorUI() {
+    const panel = document.getElementById('fomora-part-color-panel');
+    const grid = document.getElementById('fomora-part-color-grid');
+
+    if (!panel || !grid) return;
+
+    const slot = selectedSlot;
+    const partName = selectedParts[slot];
+    const config = COLORABLE_PARTS[partName];
+    const model = partModels[slot];
+
+    if (!config || !model) {
+        panel.style.display = 'none';
+        return;
+    }
+
+    panel.style.display = 'block';
+    grid.innerHTML = '';
+
+    const currentColor =
+        selectedPartColors[slot] || config.defaultColor;
+
+    config.colors.forEach(option => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'color';
+        button.title = option.name;
+        button.setAttribute('aria-label', option.name);
+        button.style.backgroundColor = option.value;
+
+        if (option.value.toLowerCase() === currentColor.toLowerCase()) {
+            button.classList.add('active');
+        }
+
+        button.addEventListener('click', () => {
+            window.changeSelectedPartColor(option.value);
+        });
+
+        grid.appendChild(button);
+    });
+}
+
+window.changeSelectedPartColor = function(color) {
+    const slot = selectedSlot;
+    const partName = selectedParts[slot];
+    const config = COLORABLE_PARTS[partName];
+    const model = partModels[slot];
+
+    if (!config || !model) return;
+
+    // 최초 색상 변경 시 원본 색상 저장
+    saveOriginalPartColors(model);
+
+    selectedPartColors[slot] = color;
+
+    applySelectedPartColor(model, color);
+
+    updatePartColorUI();
+};
+
+window.restoreSelectedPartColor = function() {
+    const slot = selectedSlot;
+    const partName = selectedParts[slot];
+    const config = COLORABLE_PARTS[partName];
+    const model = partModels[slot];
+
+    if (!config || !model) return;
+
+    // 저장된 원래 색상으로 복원
+    restoreOriginalPartColors(model);
+
+    // 선택 색상 상태 초기화
+    selectedPartColors[slot] = null;
+
+    // 색상 선택창 갱신
+    updatePartColorUI();
 };
 
 // ============================================================
@@ -786,7 +974,7 @@ const TOPPINGS = {
         file: 'topping_ramen_cap.glb',
         name: '컵라면 뚜껑',
         price: 1000
-    }
+    },
 
 };
 
@@ -948,7 +1136,7 @@ const ALL_PART_PRICES = {
 
     'tri_gimbap.all': 4000,
 
-    'BOk.all': 4000,
+    'Bok.all': 4000,
     
     'hangwa.all': 4000,
 
@@ -964,7 +1152,9 @@ const ALL_PART_PRICES = {
 
     'eggroll.all': 4000,
 
-    'yakgwa.all': 4000
+    'yakgwa.all': 4000,
+
+    'Button.all': 1000
 
 };
 
@@ -1813,6 +2003,8 @@ window.selectSlot = function(slot, element) {
 
     // 현재 색상 UI 갱신
     updateCurrentColorUI();
+
+    updatePartColorUI();
 
     // 선택된 위치 텍스트 갱신
     const selectedSlotInfo =
@@ -2988,6 +3180,15 @@ async function loadPartToSlot(
                 `./${partInfo.file}`
             );
 
+            if (COLORABLE_PARTS[partName]) {
+    const color =
+        selectedPartColors[slot] ||
+        COLORABLE_PARTS[partName].defaultColor;
+
+    selectedPartColors[slot] = color;
+    applySelectedPartColor(part, color);
+}
+
 
         productGroup.add(
             part
@@ -3263,8 +3464,10 @@ async function(
         selectedSlot
     ] = partName;
 
-    refreshToppingPosition(selectedSlot);
+    updatePartColorUI();
 
+    refreshToppingPosition(selectedSlot);
+    
 
     updateThreeKeyCaseVisibility();
 
