@@ -2778,7 +2778,7 @@ productGroup.updateMatrixWorld(true);
     // ========================================
             // 토핑별 최종 높이 보정값
 const toppingHeightAdjust = {
-    strawberry: -3,
+    strawberry: -3.5,
     cream: -0.5,
     whipcream: -1.2,
     narutomaki: -0.5,
