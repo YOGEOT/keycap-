@@ -1155,7 +1155,7 @@ const ALL_PART_PRICES = {
 
     'yakgwa.all': 4000,
 
-    'Button.all': 1000
+    'Button.all': 2000
 
 };
 
