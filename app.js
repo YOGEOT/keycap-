@@ -565,24 +565,12 @@ const PARTS = {
         price: 1000
     },
 
-    macaroon_P: {
-        file: 'macaroon_P.glb',
-        name: '마카롱P',
+    macaroon: {
+        file: 'macaroon.glb',
+        name: '마카롱',
         price: 1000
     },
-
-    macaroon_B: {
-        file: 'macaroon_B.glb',
-        name: '마카롱B',
-        price: 1000
-    },
-
-    macaroon_C: {
-        file: 'macaroon_C.glb',
-        name: '마카롱C',
-        price: 1000
-    },
-
+   
     pepero: {
         file: 'pepero.glb',
         name: '빼빼로',
@@ -736,6 +724,21 @@ const COLORABLE_PARTS = {
             { name: '브라운', value: '#755833' },
            
         ]
+    },
+
+ 
+    macaroon: {
+        defaultColor: '#EEA7B7',
+        mode: 'selected',
+        targetObjects: [
+            'macaroon_body'
+        ],
+        colors: [
+            { name: '초코', value: '#755833' },
+            { name: '핑크', value: '#ba91bd' },            
+            { name: '블루', value: '#8FBCCA' },
+           
+        ]
     }
 };
 
@@ -800,27 +803,55 @@ function restoreOriginalPartColors(model) {
     });
 }
 
+
 function applySelectedPartColor(model, color) {
     if (!model || !color) return;
+
+    // 현재 선택된 파츠의 색상 설정을 가져옵니다.
+    const partName = selectedParts[selectedSlot];
+    const config = COLORABLE_PARTS[partName];
+
+    // 색상 설정이 없으면 아무것도 변경하지 않습니다.
+    if (!config) return;
+
+    // macaroon은 지정한 오브젝트만 변경합니다.
+    const targetObjects =
+        config.mode === 'selected'
+            ? config.targetObjects || []
+            : null;
 
     model.traverse((object) => {
         if (!object.isMesh || !object.material) return;
 
-        // 기존 재질을 복제해 다른 슬롯에 영향을 주지 않도록 함
+        // 특정 오브젝트만 변경하는 파츠인 경우
+        if (
+            targetObjects &&
+            !targetObjects.includes(object.name)
+        ) {
+            return;
+        }
+
+        // 기존처럼 재질을 복제해 슬롯 간 영향을 방지합니다.
         if (Array.isArray(object.material)) {
             object.material = object.material.map(material => {
                 const cloned = material.clone();
-                if (cloned.color) cloned.color.set(color);
+
+                if (cloned.color) {
+                    cloned.color.set(color);
+                }
+
                 return cloned;
             });
         } else {
             object.material = object.material.clone();
+
             if (object.material.color) {
                 object.material.color.set(color);
             }
         }
     });
 }
+
 
 function updatePartColorUI() {
     const panel = document.getElementById('fomora-part-color-panel');
@@ -3905,63 +3936,34 @@ window.selectSwitch = async function(switchName, element) {
 
 
 // ============================================================
-// .all 파츠 확인
+// 전체 파츠 확인 - 현재 케이스에서 사용하는 슬롯만 확인
 // ============================================================
 
 function getSelectedAllPart() {
+    // 3구: 0, 2, 4번 슬롯
+    // 6구: 0, 1, 2, 3, 4, 5번 슬롯
+    const activeSlots = isThreeKeyCase()
+        ? [0, 2, 4]
+        : [0, 1, 2, 3, 4, 5];
 
-    if (
-        selectedParts.length !== 6
-    ) {
+    const firstPart = selectedParts[activeSlots[0]];
 
-        return null;
+    if (!firstPart) return null;
 
-    }
-
-
-    const firstPart =
-        selectedParts[0];
-
-
-    if (!firstPart)
-        return null;
-
-
-    for (
-        let i = 0;
-        i < 6;
-        i++
-    ) {
-
-        if (
-            selectedParts[i] !==
-            firstPart
-        ) {
-
+    // 현재 사용하는 슬롯에 같은 파츠가 있는지 확인
+    for (const i of activeSlots) {
+        if (selectedParts[i] !== firstPart) {
             return null;
-
         }
-
     }
 
+    const allPartName = `${firstPart}.all`;
 
-    const allPartName =
-        `${firstPart}.all`;
-
-
-    if (
-        ALL_PART_PRICES[
-            allPartName
-        ] !== undefined
-    ) {
-
+    if (ALL_PART_PRICES[allPartName] !== undefined) {
         return allPartName;
-
     }
-
 
     return null;
-
 }
 
 
@@ -4003,56 +4005,37 @@ function updatePrice() {
             : 0;
 
 
+   
     // 전체 파츠
 
-    const selectedAllPart =
-        getSelectedAllPart();
+    const activeSlots = isThreeKeyCase()
+        ? [0, 2, 4]
+        : [0, 1, 2, 3, 4, 5];
 
+    const selectedAllPart = getSelectedAllPart();
 
     if (selectedAllPart) {
+        partPrice = ALL_PART_PRICES[selectedAllPart];
+    } else {
+        // 현재 케이스에서 사용하는 슬롯의 파츠 가격 합산
+        for (const i of activeSlots) {
+            const partName = selectedParts[i];
 
-        partPrice =
-            ALL_PART_PRICES[
-                selectedAllPart
-            ];
+            if (!partName) continue;
 
-    }
+            const partInfo = PARTS[partName];
 
-    else {
+            if (!partInfo) continue;
 
-        for (
-            let i = 0;
-            i < 6;
-            i++
-        ) {
-
-            const partName =
-                selectedParts[i];
-
-
-            if (!partName)
-                continue;
-
-
-            const partInfo =
-                PARTS[partName];
-
-
-            if (!partInfo)
-                continue;
-
-
-            partPrice +=
-                partInfo.price;
-
+            partPrice += partInfo.price;
         }
-
     }
 
-    // 토핑 가격 합산
+
+    // 현재 케이스에서 사용하는 슬롯의 토핑 가격만 합산
 let toppingPrice = 0;
 
-for (let i = 0; i < 6; i++) {
+for (const i of activeSlots) {
     const toppingName = selectedToppings[i];
 
     if (!toppingName) continue;
@@ -4064,8 +4047,9 @@ for (let i = 0; i < 6; i++) {
     toppingPrice += toppingInfo.price;
 }
 
-// 기존 파츠 가격에 토핑 가격 추가
+// 파츠 가격에 토핑 가격 추가
 partPrice += toppingPrice;
+
 
 
     // 총 금액
