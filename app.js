@@ -729,12 +729,13 @@ const COLORABLE_PARTS = {
             { name: '블랙', value: '#454545' },
             { name: '화이트', value: '#F2F0EB' },
             { name: '그레이', value: '#8f8f8f' },
+            { name: '브라운', value: '#755833' },
+            { name: '퍼플', value: '#ba91bd' },            
+            { name: '블루', value: '#8ac2d3' },
             { name: '핑크', value: '#E8B7C3' },
-            { name: '블루', value: '#809ecc' },
             { name: '옐로우', value: '#E8D28B' },
             { name: '그린', value: '#A9BCA0' },
-            { name: '브라운', value: '#755833' },
-           
+                       
         ]
     },
 
@@ -750,8 +751,9 @@ const COLORABLE_PARTS = {
             { name: '화이트', value: '#F2F0EB' },
             { name: '그레이', value: '#8f8f8f' },
             { name: '초코', value: '#755833' },
-            { name: '핑크', value: '#ba91bd' },            
-            { name: '블루', value: '#8FBCCA' },
+            { name: '퍼플', value: '#ba91bd' },            
+            { name: '블루', value: '#8ac2d3' },
+            { name: '핑크', value: '#E8B7C3' },
             { name: '옐로우', value: '#E8D28B' },
             { name: '그린', value: '#A9BCA0' },
            
@@ -770,7 +772,8 @@ const COLORABLE_PARTS = {
             { name: '그레이', value: '#8f8f8f' },
             { name: '초코', value: '#755833' },
             { name: '핑크', value: '#ba91bd' },            
-            { name: '블루', value: '#8FBCCA' },
+            { name: '블루', value: '#8ac2d3' },
+            { name: '핑크', value: '#E8B7C3' },
             { name: '옐로우', value: '#E8D28B' },
             { name: '그린', value: '#A9BCA0' },
            
