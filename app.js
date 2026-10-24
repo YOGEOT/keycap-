@@ -701,6 +701,18 @@ const PARTS = {
         file: 'Button.glb',
         name: '단추',
         price: 500
+    },
+
+    Button_thread: {
+        file: 'Button_thread.glb',
+        name: '단추_바느질',
+        price: 1000
+    },
+
+    Button_thread_v2: {
+        file: 'Button_thread_v2.glb',
+        name: '단추_바느질_테두리',
+        price: 1000
     }
 
 };
@@ -722,6 +734,45 @@ const COLORABLE_PARTS = {
             { name: '옐로우', value: '#E8D28B' },
             { name: '그린', value: '#A9BCA0' },
             { name: '브라운', value: '#755833' },
+           
+        ]
+    },
+
+
+    Button_thread: {
+        defaultColor: '#BA3F3F',
+        mode: 'selected',
+        targetObjects: [
+            'Button_body'
+        ],
+        colors: [
+            { name: '블랙', value: '#454545' },
+            { name: '화이트', value: '#F2F0EB' },
+            { name: '그레이', value: '#8f8f8f' },
+            { name: '초코', value: '#755833' },
+            { name: '핑크', value: '#ba91bd' },            
+            { name: '블루', value: '#8FBCCA' },
+            { name: '옐로우', value: '#E8D28B' },
+            { name: '그린', value: '#A9BCA0' },
+           
+        ]
+    },
+
+    Button_thread_v2: {
+        defaultColor: '#BA3F3F',
+        mode: 'selected',
+        targetObjects: [
+            'Button_body'
+        ],
+        colors: [
+            { name: '블랙', value: '#454545' },
+            { name: '화이트', value: '#F2F0EB' },
+            { name: '그레이', value: '#8f8f8f' },
+            { name: '초코', value: '#755833' },
+            { name: '핑크', value: '#ba91bd' },            
+            { name: '블루', value: '#8FBCCA' },
+            { name: '옐로우', value: '#E8D28B' },
+            { name: '그린', value: '#A9BCA0' },
            
         ]
     },
@@ -1186,7 +1237,11 @@ const ALL_PART_PRICES = {
 
     'yakgwa.all': 4000,
 
-    'Button.all': 2000
+    'Button.all': 2000,
+
+    'Button_thread.all': 4000,
+
+    'Button_thread_v2.all': 4000
 
 };
 
