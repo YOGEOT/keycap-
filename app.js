@@ -713,6 +713,12 @@ const PARTS = {
         file: 'Button_thread_v2.glb',
         name: '단추_바느질_테두리',
         price: 1000
+    },
+
+    sushi_shrimp: {
+        file: 'sushi_shrimp.glb',
+        name: '새우초밥',
+        price: 1200
     }
 
 };
@@ -1244,7 +1250,9 @@ const ALL_PART_PRICES = {
 
     'Button_thread.all': 4000,
 
-    'Button_thread_v2.all': 4000
+    'Button_thread_v2.all': 4000,
+
+    'sushi_shrimp.all': 4200
 
 };
 
