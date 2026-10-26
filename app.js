@@ -985,7 +985,7 @@ function updatePartColorUI() {
 
         const sections = [
             {
-                title: '쿠키 색',
+                title: '쿠키',
                 configName: 'cookie',
                 targetName: 'cookie_body',
                 getColor: () => selectedCookieBodyColors[slot],
@@ -994,7 +994,7 @@ function updatePartColorUI() {
                 }
             },
             {
-                title: '초코칩 색',
+                title: '초코칩',
                 configName: 'cookie_chips',
                 targetName: 'cookie_chips',
                 getColor: () => selectedCookieChipsColors[slot],
