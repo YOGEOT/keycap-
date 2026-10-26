@@ -777,11 +777,31 @@ const COLORABLE_PARTS = {
             { name: '화이트', value: '#F2F0EB' },
             { name: '그레이', value: '#8f8f8f' },
             { name: '초코', value: '#755833' },
-            { name: '핑크', value: '#ba91bd' },            
+            { name: '퍼플', value: '#ba91bd' },            
             { name: '블루', value: '#8ac2d3' },
             { name: '핑크', value: '#E8B7C3' },
             { name: '옐로우', value: '#E8D28B' },
             { name: '그린', value: '#A9BCA0' },
+           
+        ]
+    },
+
+
+    cookie: {
+        defaultColor: '#BF8D5C',
+        mode: 'selected',
+        targetObjects: [
+            'cookie_body'
+        ],
+        colors: [
+            { name: '블랙', value: '#454545' },
+            { name: '화이트', value: '#F2F0EB' },            
+            { name: '초코', value: '#584021' },                      
+            { name: '블루', value: '#8ac2d3' },
+            { name: '핑크', value: '#E8B7C3' },           
+            { name: '그린', value: '#54694b' },
+            { name: '치즈', value: '#faa82d' },
+            { name: '레드', value: '#d34747' },  
            
         ]
     },
