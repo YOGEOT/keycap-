@@ -799,8 +799,27 @@ const COLORABLE_PARTS = {
             { name: '초코', value: '#584021' },                      
             { name: '블루', value: '#8ac2d3' },
             { name: '핑크', value: '#E8B7C3' },           
-            { name: '그린', value: '#54694b' },
+            { name: '그린', value: '#788b70' },
             { name: '치즈', value: '#faa82d' },
+            { name: '레드', value: '#d34747' },  
+           
+        ]
+    },
+
+
+    cookie_chips: {
+        defaultColor: '#62493E',
+        mode: 'selected',
+        targetObjects: [
+            'cookie_chips'
+        ],
+        colors: [          
+            { name: '화이트', value: '#F2F0EB'},            
+            { name: '초코', value: '#3f2316' },                      
+            { name: '블루', value: '#8ac2d3' },
+            { name: '핑크', value: '#E8B7C3' },           
+            { name: '그린', value: '#3f493a' },
+            { name: '치즈', value: '#fadeb3' },
             { name: '레드', value: '#d34747' },  
            
         ]
@@ -822,7 +841,14 @@ const COLORABLE_PARTS = {
     }
 };
 
+// 슬롯별 일반 파츠 색상
 const selectedPartColors = Array(6).fill(null);
+
+// 슬롯별 쿠키 몸체 색상
+const selectedCookieBodyColors = Array(6).fill(null);
+
+// 슬롯별 쿠키 초코칩 색상
+const selectedCookieChipsColors = Array(6).fill(null);
 
 // ============================================================
 // 슬롯별 파츠 원본 색상 저장
@@ -884,17 +910,18 @@ function restoreOriginalPartColors(model) {
 }
 
 
-function applySelectedPartColor(model, color) {
+
+function applySelectedPartColor(model, color, partNameOverride = null) {
     if (!model || !color) return;
 
-    // 현재 선택된 파츠의 색상 설정을 가져옵니다.
-    const partName = selectedParts[selectedSlot];
+    // 전달받은 파츠 이름을 우선 사용합니다.
+    const partName =
+        partNameOverride || selectedParts[selectedSlot];
+
     const config = COLORABLE_PARTS[partName];
 
-    // 색상 설정이 없으면 아무것도 변경하지 않습니다.
     if (!config) return;
 
-    // macaroon은 지정한 오브젝트만 변경합니다.
     const targetObjects =
         config.mode === 'selected'
             ? config.targetObjects || []
@@ -903,7 +930,7 @@ function applySelectedPartColor(model, color) {
     model.traverse((object) => {
         if (!object.isMesh || !object.material) return;
 
-        // 특정 오브젝트만 변경하는 파츠인 경우
+        // 설정된 오브젝트만 변경
         if (
             targetObjects &&
             !targetObjects.includes(object.name)
@@ -911,9 +938,9 @@ function applySelectedPartColor(model, color) {
             return;
         }
 
-        // 기존처럼 재질을 복제해 슬롯 간 영향을 방지합니다.
+        // 기존 재질을 복제해 다른 모델에 영향이 없도록 합니다.
         if (Array.isArray(object.material)) {
-            object.material = object.material.map(material => {
+            object.material = object.material.map((material) => {
                 const cloned = material.clone();
 
                 if (cloned.color) {
@@ -933,6 +960,8 @@ function applySelectedPartColor(model, color) {
 }
 
 
+
+
 function updatePartColorUI() {
     const panel = document.getElementById('fomora-part-color-panel');
     const grid = document.getElementById('fomora-part-color-grid');
@@ -941,21 +970,157 @@ function updatePartColorUI() {
 
     const slot = selectedSlot;
     const partName = selectedParts[slot];
-    const config = COLORABLE_PARTS[partName];
     const model = partModels[slot];
 
-    if (!config || !model) {
+    if (!model || !partName) {
         panel.style.display = 'none';
         return;
     }
 
     panel.style.display = 'block';
+
+    // 쿠키는 몸체와 초코칩 색상창을 각각 표시합니다.
+    if (partName === 'cookie') {
+        grid.innerHTML = '';
+
+        const sections = [
+            {
+                title: '쿠키 몸체 색상',
+                configName: 'cookie',
+                targetName: 'cookie_body',
+                getColor: () => selectedCookieBodyColors[slot],
+                setColor: (color) => {
+                    selectedCookieBodyColors[slot] = color;
+                }
+            },
+            {
+                title: '초코칩 색상',
+                configName: 'cookie_chips',
+                targetName: 'cookie_chips',
+                getColor: () => selectedCookieChipsColors[slot],
+                setColor: (color) => {
+                    selectedCookieChipsColors[slot] = color;
+                }
+            }
+        ];
+
+        sections.forEach((section) => {
+            const config = COLORABLE_PARTS[section.configName];
+            if (!config) return;
+
+            const wrapper = document.createElement('div');
+            wrapper.style.marginBottom = '16px';
+
+            const title = document.createElement('div');
+            title.textContent = section.title;
+            title.style.fontWeight = '600';
+            title.style.marginBottom = '8px';
+
+            const colorGrid = document.createElement('div');
+            colorGrid.className = 'color-grid';
+
+            config.colors.forEach((option) => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'color';
+                button.title = option.name;
+                button.setAttribute('aria-label', option.name);
+                button.style.backgroundColor = option.value;
+
+                const currentColor =
+                    section.getColor() || config.defaultColor;
+
+                if (
+                    option.value.toLowerCase() ===
+                    currentColor.toLowerCase()
+                ) {
+                    button.classList.add('active');
+                }
+
+                button.addEventListener('click', () => {
+                    saveOriginalPartColors(model);
+
+                    section.setColor(option.value);
+
+                    applySelectedPartColor(
+                        model,
+                        option.value,
+                        section.configName
+                    );
+
+                    updatePartColorUI();
+                });
+
+                colorGrid.appendChild(button);
+            });
+
+            const restoreButton = document.createElement('button');
+            restoreButton.type = 'button';
+            restoreButton.textContent = '↺ 색상복원';
+
+            restoreButton.addEventListener('click', () => {
+                restoreCookieTargetColor(
+                    model,
+                    section.targetName
+                );
+
+                section.setColor(null);
+                updatePartColorUI();
+            });
+
+            wrapper.appendChild(title);
+            wrapper.appendChild(colorGrid);
+            wrapper.appendChild(restoreButton);
+            grid.appendChild(wrapper);
+        });
+
+        return;
+    }
+
+    
+function restoreCookieTargetColor(model, targetObjectName) {
+    if (!model) return;
+
+    const savedMeshes = originalPartColors.get(model);
+
+    if (!savedMeshes) return;
+
+    savedMeshes.forEach((saved) => {
+        const object = saved.object;
+
+        // 지정한 오브젝트만 복원합니다.
+        if (!object || object.name !== targetObjectName) return;
+        if (!object.material) return;
+
+        const materials = Array.isArray(object.material)
+            ? object.material
+            : [object.material];
+
+        materials.forEach((material, index) => {
+            const original = saved.materials[index];
+
+            if (material.color && original?.color) {
+                material.color.copy(original.color);
+            }
+        });
+    });
+}
+
+
+    // 쿠키 이외의 파츠는 기존 색상창을 사용합니다.
+    const config = COLORABLE_PARTS[partName];
+
+    if (!config) {
+        panel.style.display = 'none';
+        return;
+    }
+
     grid.innerHTML = '';
 
     const currentColor =
         selectedPartColors[slot] || config.defaultColor;
 
-    config.colors.forEach(option => {
+    config.colors.forEach((option) => {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'color';
@@ -963,7 +1128,10 @@ function updatePartColorUI() {
         button.setAttribute('aria-label', option.name);
         button.style.backgroundColor = option.value;
 
-        if (option.value.toLowerCase() === currentColor.toLowerCase()) {
+        if (
+            option.value.toLowerCase() ===
+            currentColor.toLowerCase()
+        ) {
             button.classList.add('active');
         }
 
@@ -974,6 +1142,7 @@ function updatePartColorUI() {
         grid.appendChild(button);
     });
 }
+
 
 window.changeSelectedPartColor = function(color) {
     const slot = selectedSlot;
@@ -988,7 +1157,7 @@ window.changeSelectedPartColor = function(color) {
 
     selectedPartColors[slot] = color;
 
-    applySelectedPartColor(model, color);
+applySelectedPartColor(model, color, partName);
 
     updatePartColorUI();
 };
