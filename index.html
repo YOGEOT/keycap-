@@ -604,19 +604,41 @@
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
+
 @media (max-width: 900px) {
     #fomora-part-color-panel {
+        position: absolute;
+
+        /* 미리보기 영역 안에서 오른쪽 위에 배치 */
+        top: 8px;
         right: 8px;
-        bottom: 8px;
-        width: 150px;
+        bottom: auto;
+        left: auto;
+
+        /* 기존 150px보다 넓게 확보 */
+        width: 180px;
         max-width: calc(100% - 16px);
+
+        /* 색상창 전체가 화면을 벗어나지 않도록 제한 */
+        max-height: calc(45dvh - 16px);
+        overflow-x: hidden;
+        overflow-y: auto;
+
         padding: 10px;
+        box-sizing: border-box;
+
+        z-index: 1000;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
     }
 
     #fomora-part-color-grid {
+        display: flex;
+        flex-wrap: wrap;
         gap: 8px;
     }
 }
+
     </style>
 
 </head>
@@ -639,7 +661,7 @@
     <!-- 단추 색상 선택창: 미리보기 화면 위에 표시 -->
     <div id="fomora-part-color-panel">
         <div style="margin-bottom: 10px; font-weight: 600;">
-            단추 색상 선택
+            색상 선택
         </div>
 
         <div id="fomora-part-color-grid" class="color-grid"></div>
