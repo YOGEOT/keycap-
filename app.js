@@ -719,6 +719,12 @@ const PARTS = {
         file: 'sushi_shrimp.glb',
         name: '새우초밥',
         price: 1200
+    },
+
+    bear: {
+        file: 'bear.glb',
+        name: '곰',
+        price: 1000
     }
 
 };
@@ -838,7 +844,29 @@ const COLORABLE_PARTS = {
             { name: '블루', value: '#8FBCCA' },
            
         ]
-    }
+    },
+
+
+    bear: {
+        defaultColor: '#969696',
+        mode: 'selected',
+        targetObjects: [
+            'bear_body'
+        ],
+        colors: [
+            { name: '블랙', value: '#252525'},      
+            { name: '화이트', value: '#ffffff'},            
+            { name: '초코', value: '#8a6250' },                      
+            { name: '블루', value: '#8ac2d3' },
+            { name: '핑크', value: '#E8B7C3' },           
+            { name: '그린', value: '#88a17b' },        
+            { name: '레드', value: '#d34747' },  
+           
+        ]
+    },
+
+
+    
 };
 
 // 슬롯별 일반 파츠 색상
@@ -911,52 +939,66 @@ function restoreOriginalPartColors(model) {
 
 
 
-function applySelectedPartColor(model, color, partNameOverride = null) {
-    if (!model || !color) return;
+function applySelectedPartColor(model, color, partName) {
 
-    // 전달받은 파츠 이름을 우선 사용합니다.
-    const partName =
-        partNameOverride || selectedParts[selectedSlot];
-
+    // 전달받은 파츠 이름으로 색상 설정을 가져옵니다.
     const config = COLORABLE_PARTS[partName];
 
-    if (!config) return;
+    if (!config || !model) return;
 
-    const targetObjects =
-        config.mode === 'selected'
-            ? config.targetObjects || []
-            : null;
+    model.traverse((child) => {
 
-    model.traverse((object) => {
-        if (!object.isMesh || !object.material) return;
+        if (!child.isMesh) return;
 
-        // 설정된 오브젝트만 변경
+        // 선택된 대상 오브젝트에만 색상을 적용합니다.
         if (
-            targetObjects &&
-            !targetObjects.includes(object.name)
+            config.mode === 'selected' &&
+            !config.targetObjects.includes(child.name)
         ) {
             return;
         }
 
-        // 기존 재질을 복제해 다른 모델에 영향이 없도록 합니다.
-        if (Array.isArray(object.material)) {
-            object.material = object.material.map((material) => {
-                const cloned = material.clone();
+        if (Array.isArray(child.material)) {
 
-                if (cloned.color) {
-                    cloned.color.set(color);
-                }
+    child.material = child.material.map(material => {
 
-                return cloned;
-            });
-        } else {
-            object.material = object.material.clone();
+        const newMaterial = material.clone();
 
-            if (object.material.color) {
-                object.material.color.set(color);
-            }
+        if (newMaterial.color) {
+            newMaterial.color.set(color);
         }
+
+        if ('roughness' in newMaterial) {
+            newMaterial.roughness = 0.9;
+        }
+
+        if ('metalness' in newMaterial) {
+            newMaterial.metalness = 0.0;
+        }
+
+        return newMaterial;
     });
+
+} else {
+
+    child.material = child.material.clone();
+
+    if (child.material.color) {
+        child.material.color.set(color);
+    }
+
+    if ('roughness' in child.material) {
+        child.material.roughness = 0.5;
+    }
+
+    if ('metalness' in child.material) {
+        child.material.metalness = 0.0;
+    }
+
+}
+
+    });
+
 }
 
 
@@ -1441,7 +1483,9 @@ const ALL_PART_PRICES = {
 
     'Button_thread_v2.all': 4000,
 
-    'sushi_shrimp.all': 4200
+    'sushi_shrimp.all': 4200,
+
+    'bear.all': 4000
 
 };
 
@@ -3439,66 +3483,47 @@ window.setToppingPlacement = function(placement) {
 // 파츠 로드
 // ============================================================
 
-async function loadPartToSlot(
-    partName,
-    slot
-) {
+async function loadPartToSlot(partName, slot) {
 
-    const partInfo =
-        PARTS[partName];
-
+    const partInfo = PARTS[partName];
 
     if (!partInfo) {
-
-        console.error(
-            '등록되지 않은 파츠:',
-            partName
-        );
-
+        console.error('등록되지 않은 파츠:', partName);
         return null;
-
     }
-
 
     try {
 
-        const part =
-            await loadGLB(
-                `./${partInfo.file}`
-            );
+        const part = await loadGLB(
+            `./${partInfo.file}`
+        );
 
-            if (COLORABLE_PARTS[partName]) {
+        // 선택한 파츠 자체의 디폴트 컬러 적용
+if (COLORABLE_PARTS[partName]) {
+
     const color =
-        selectedPartColors[slot] ||
         COLORABLE_PARTS[partName].defaultColor;
 
+    // 현재 슬롯의 선택 색상도 새 파츠의 디폴트 컬러로 갱신
     selectedPartColors[slot] = color;
-    applySelectedPartColor(part, color);
+
+    // 새로 불러온 파츠 모델에 컬러 적용
+    applySelectedPartColor(
+        part,
+        color,
+        partName
+    );
 }
 
+        productGroup.add(part);
 
-        productGroup.add(
-            part
-        );
-
-
-        movePartToSlot(
-            part,
-            slot
-        );
-
-       
+        movePartToSlot(part, slot);
 
         return part;
 
-    }
+    } catch (error) {
 
-    catch (error) {
-
-        console.error(
-            '파츠 로드 실패:',
-            error
-        );
+        console.error('파츠 로드 실패:', error);
 
         return null;
 
