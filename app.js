@@ -848,7 +848,7 @@ const COLORABLE_PARTS = {
 
 
     bear: {
-        defaultColor: '#969696',
+        defaultColor: '#8e65a1',
         mode: 'selected',
         targetObjects: [
             'bear_body'
@@ -860,7 +860,7 @@ const COLORABLE_PARTS = {
             { name: '블루', value: '#8ac2d3' },
             { name: '핑크', value: '#E8B7C3' },           
             { name: '그린', value: '#88a17b' },        
-            { name: '레드', value: '#d34747' },  
+            { name: '레드', value: '#aa3f3f' },  
            
         ]
     },
@@ -988,7 +988,7 @@ function applySelectedPartColor(model, color, partName) {
     }
 
     if ('roughness' in child.material) {
-        child.material.roughness = 0.5;
+        child.material.roughness = 0.4;
     }
 
     if ('metalness' in child.material) {
