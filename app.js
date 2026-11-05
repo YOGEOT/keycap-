@@ -570,6 +570,12 @@ const PARTS = {
         name: '마카롱',
         price: 1000
     },
+
+    heart_macaroon: {
+        file: 'heart_macaroon.glb',
+        name: '하트마카롱',
+        price: 1000
+    },
    
     pepero: {
         file: 'pepero.glb',
@@ -837,6 +843,21 @@ const COLORABLE_PARTS = {
         mode: 'selected',
         targetObjects: [
             'macaroon_body'
+        ],
+        colors: [
+            { name: '초코', value: '#755833' },
+            { name: '핑크', value: '#ba91bd' },            
+            { name: '블루', value: '#8FBCCA' },
+           
+        ]
+    },
+
+
+    heart_macaroon: {
+        defaultColor: '#EEA7B7',
+        mode: 'selected',
+        targetObjects: [
+            'heart_macaroon_body'
         ],
         colors: [
             { name: '초코', value: '#755833' },
