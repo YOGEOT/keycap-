@@ -579,7 +579,7 @@ const PARTS = {
    
     pepero: {
         file: 'pepero.glb',
-        name: '빼빼로',
+        name: '막대과자',
         price: 500
     },
 
