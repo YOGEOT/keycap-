@@ -577,8 +577,8 @@ const PARTS = {
         price: 1000
     },
    
-    pepero: {
-        file: 'pepero.glb',
+    choco_stick: {
+        file: 'choco_stick.glb',
         name: '막대과자',
         price: 500
     },
@@ -882,6 +882,25 @@ const COLORABLE_PARTS = {
             { name: '핑크', value: '#E8B7C3' },           
             { name: '그린', value: '#88a17b' },        
             { name: '레드', value: '#aa3f3f' },  
+           
+        ]
+    },
+
+
+    choco_stick: {
+        defaultColor: '#62493E',
+        mode: 'selected',
+        targetObjects: [
+            'choco_stick_body'
+        ],
+        colors: [
+            { name: '블랙', value: '#454545' },
+            { name: '화이트', value: '#F2F0EB' },           
+            { name: '블루', value: '#8ac2d3' },
+            { name: '핑크', value: '#E8B7C3' },           
+            { name: '그린', value: '#788b70' },
+            { name: '치즈', value: '#faa82d' },
+            { name: '레드', value: '#d34747' },  
            
         ]
     },
@@ -1398,6 +1417,11 @@ const BASE_OPTIONS = {
 
     'case.glb': {
         name: '기본 베이스',
+        price: 0
+    },
+
+    'case_non.glb': {
+        name: '고리x',
         price: 0
     },
 
