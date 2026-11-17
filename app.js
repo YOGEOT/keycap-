@@ -731,6 +731,18 @@ const PARTS = {
         file: 'bear.glb',
         name: '곰',
         price: 1000
+    },
+
+    cat_paw: {
+        file: 'cat_paw.glb',
+        name: '고양이발바닥',
+        price: 1000
+    },
+
+    cat_paw_nail: {
+        file: 'cat_paw_nail.glb',
+        name: '고양이발바닥_발톱',
+        price: 1000
     }
 
 };
