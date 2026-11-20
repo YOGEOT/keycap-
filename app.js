@@ -721,6 +721,18 @@ const PARTS = {
         price: 1000
     },
 
+    Button_star: {
+        file: 'Button_star.glb',
+        name: '단추_별',
+        price: 1000
+    },
+
+    Button_heart: {
+        file: 'Button_heart.glb',
+        name: '단추_하트',
+        price: 1000
+    },
+
     sushi_shrimp: {
         file: 'sushi_shrimp.glb',
         name: '새우초밥',
@@ -913,6 +925,48 @@ const COLORABLE_PARTS = {
             { name: '그린', value: '#788b70' },
             { name: '치즈', value: '#faa82d' },
             { name: '레드', value: '#d34747' },  
+           
+        ]
+    },
+
+
+    Button_star: {
+        defaultColor: '#BA3F3F',
+        mode: 'selected',
+        targetObjects: [
+            'Button_star_body'
+        ],
+        colors: [
+            { name: '블랙', value: '#454545' },
+            { name: '화이트', value: '#F2F0EB' },
+            { name: '그레이', value: '#8f8f8f' },
+            { name: '초코', value: '#755833' },
+            { name: '퍼플', value: '#ba91bd' },            
+            { name: '블루', value: '#8ac2d3' },
+            { name: '핑크', value: '#E8B7C3' },
+            { name: '옐로우', value: '#E8D28B' },
+            { name: '그린', value: '#A9BCA0' },
+           
+        ]
+    },
+
+
+    Button_heart: {
+        defaultColor: '#BA3F3F',
+        mode: 'selected',
+        targetObjects: [
+            'Button_heart_body'
+        ],
+        colors: [
+            { name: '블랙', value: '#454545' },
+            { name: '화이트', value: '#F2F0EB' },
+            { name: '그레이', value: '#8f8f8f' },
+            { name: '초코', value: '#755833' },
+            { name: '퍼플', value: '#ba91bd' },            
+            { name: '블루', value: '#8ac2d3' },
+            { name: '핑크', value: '#E8B7C3' },
+            { name: '옐로우', value: '#E8D28B' },
+            { name: '그린', value: '#A9BCA0' },
            
         ]
     },
