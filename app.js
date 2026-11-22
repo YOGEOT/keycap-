@@ -972,17 +972,38 @@ const COLORABLE_PARTS = {
     },
 
 
+    Button_heart_thread: {
+        defaultColor: '#BA3F3F',
+        mode: 'selected',
+        targetObjects: [
+            'Button_heart_thread'
+        ],
+        colors: [
+            { name: '블랙', value: '#454545' },
+            { name: '화이트', value: '#F2F0EB' },
+            { name: '그레이', value: '#8f8f8f' },
+            { name: '초코', value: '#755833' },
+            { name: '퍼플', value: '#ba91bd' },            
+            { name: '블루', value: '#8ac2d3' },
+            { name: '핑크', value: '#E8B7C3' },
+            { name: '옐로우', value: '#E8D28B' },
+            { name: '그린', value: '#A9BCA0' },
+           
+        ]
+    },
+
+
     
 };
 
 // 슬롯별 일반 파츠 색상
-const selectedPartColors = Array(6).fill(null);
+const selectedPartColors = Array(7).fill(null);
 
 // 슬롯별 쿠키 몸체 색상
-const selectedCookieBodyColors = Array(6).fill(null);
+const selectedCookieBodyColors = Array(7).fill(null);
 
 // 슬롯별 쿠키 초코칩 색상
-const selectedCookieChipsColors = Array(6).fill(null);
+const selectedCookieChipsColors = Array(7).fill(null);
 
 // ============================================================
 // 슬롯별 파츠 원본 색상 저장
@@ -1499,6 +1520,11 @@ const BASE_OPTIONS = {
     'case_3botton.glb': {
         name: '3구 케이스',
         price: -4000
+    },
+
+    'case_4botton.glb': {
+        name: '4구 케이스',
+        price: -4000
     }
 
 };
@@ -1611,105 +1637,61 @@ let selectedBase =
     'case.glb';
 
 
-let capModels = [
-    null,
-    null,
-    null,
-    null,
-    null,
-    null
-];
+// ============================================================
+// 슬롯별 모델 및 선택 상태
+// 총 7개 슬롯 사용
+// ============================================================
 
+let capModels = Array(7).fill(null);
 
-let partModels = [
-    null,
-    null,
-    null,
-    null,
-    null,
-    null
-];
+let partModels = Array(7).fill(null);
 
-
-let selectedParts = [
-    null,
-    null,
-    null,
-    null,
-    null,
-    null
-];
+let selectedParts = Array(7).fill(null);
 
 
 // ============================================================
 // 슬롯별 토핑 상태
 // ============================================================
 
-// 슬롯별로 선택한 토핑 이름
-let selectedToppings = [
-    null, null, null, null, null, null
-];
+let selectedToppings = Array(7).fill(null);
 
-// 슬롯별 토핑 GLB 모델
-let toppingModels = [
-    null, null, null, null, null, null
-];
+let toppingModels = Array(7).fill(null);
 
-// 슬롯별 배치 위치: top 또는 side
-let toppingPlacements = [
-    'top', 'top', 'top', 'top', 'top', 'top'
-];
+let toppingPlacements = Array(7).fill('top');
 
-// 비동기 로드 중 오래된 선택이 덮어쓰지 않도록 하는 번호
-let toppingLoadTokens = [0, 0, 0, 0, 0, 0];
+let toppingLoadTokens = Array(7).fill(0);
 
 
-let switchModels = [
-    null,
-    null,
-    null,
-    null,
-    null,
-    null
-];
+// ============================================================
+// 슬롯별 축 모델
+// ============================================================
+
+let switchModels = Array(7).fill(null);
 
 
-let selectedSwitch =
-    'blue';
+// ============================================================
+// 선택 상태
+// ============================================================
 
+let selectedSwitch = 'blue';
 
-let selectedType =
-    'A';
+let selectedType = 'A';
 
+let selectedSlot = 0;
 
-let selectedSlot =
-    0;
+let selectedBaseColor = '#886363';
 
-
-let selectedBaseColor =
-    '#886363';
-
-
-let selectedKeycapColors = [
-
-    '#886363',
-    '#886363',
-    '#886363',
-    '#886363',
-    '#886363',
-    '#886363'
-
-];
+let selectedKeycapColors = Array(7).fill('#886363');
 
 window.selectAllKeycapColor = function(color, element) {
 
     // 전체 키캡 색상 저장
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 7; i++) {
         selectedKeycapColors[i] = color;
     }
 
     // 전체 키캡에 색상 적용
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 7; i++) {
 
         const cap = capModels[i];
 
@@ -2110,60 +2092,53 @@ function isThreeKeyCase() {
 }
 
 
+
 // ============================================================
-// 3구 케이스 가시성
+// 3구 / 4구 / 6구 케이스 가시성
 // ============================================================
 
 function updateThreeKeyCaseVisibility() {
 
-    const threeKey =
-        isThreeKeyCase();
+    const threeKey = isThreeKeyCase();
 
+    const fourKey =
+        selectedBase === 'case_4botton.glb';
 
-    for (
-        let i = 0;
-        i < 6;
-        i++
-    ) {
+    // 총 7개 슬롯의 표시 여부 확인
+    for (let i = 0; i < 7; i++) {
 
-        const visible =
-            !threeKey ||
-            i === 0 ||
-            i === 2 ||
-            i === 4;
+        // 기본 6구 케이스: KEY 1~6만 표시
+        // KEY 7(index 6)은 숨김
+        let visible = i < 6;
 
-
-        if (capModels[i]) {
-
-            capModels[i].visible =
-                visible;
-
+        // 3구 케이스: KEY 1, 3, 5만 표시
+        if (threeKey) {
+            visible = [0, 2, 4].includes(i);
         }
 
+        // 4구 케이스: KEY 1, 3, 5, 7만 표시
+        if (fourKey) {
+            visible = [0, 2, 4, 6].includes(i);
+        }
+
+        if (capModels[i]) {
+            capModels[i].visible = visible;
+        }
 
         if (partModels[i]) {
-
-            partModels[i].visible =
-                visible;
-
+            partModels[i].visible = visible;
         }
 
         if (toppingModels[i]) {
-            toppingModels[i].visible =
-                visible;
+            toppingModels[i].visible = visible;
         }
-
 
         if (switchModels[i]) {
-
-            switchModels[i].visible =
-                visible;
-
+            switchModels[i].visible = visible;
         }
-
     }
-
 }
+
 
 
 // ============================================================
@@ -2261,58 +2236,37 @@ function(element) {
 
 // ============================================================
 // KEYCAP 로드
+// 총 7개 슬롯 처리
 // ============================================================
 
-async function loadCaps(
-    type
-) {
+async function loadCaps(type) {
 
-    for (
-        let i = 0;
-        i < 6;
-        i++
-    ) {
+    // 기존 키캡 7개 제거
+    for (let i = 0; i < 7; i++) {
 
         if (capModels[i]) {
-
-            productGroup.remove(
-                capModels[i]
-            );
-
+            productGroup.remove(capModels[i]);
             capModels[i] = null;
-
         }
 
     }
 
-
     try {
 
-        for (
-            let i = 0;
-            i < 6;
-            i++
-        ) {
+        // 새 키캡 7개 로드
+        for (let i = 0; i < 7; i++) {
 
             const path =
                 `./Type${type}_cap${i + 1}.glb`;
 
-
             const model =
-                await loadGLB(
-                    path
-                );
+                await loadGLB(path);
 
+            capModels[i] = model;
 
-            capModels[i] =
-                model;
+            productGroup.add(model);
 
-
-            productGroup.add(
-                model
-            );
-
-
+            // 슬롯별 저장된 색상 적용
             applyKeycapColorToModel(
                 model,
                 selectedKeycapColors[i]
@@ -2320,29 +2274,28 @@ async function loadCaps(
 
         }
 
+        // 케이스 종류에 따라 키캡 표시
+        updateThreeKeyCaseVisibility();
 
-       updateThreeKeyCaseVisibility();
+        // 선택된 키캡 외곽선 갱신
+        setSelectedCapOutline(selectedSlot);
 
-// 현재 선택된 슬롯의 외곽선 갱신
-setSelectedCapOutline(selectedSlot);
-
-await reloadSelectedSwitch();
-
+        // 선택된 축 다시 적용
+        await reloadSelectedSwitch();
 
         fitCameraToProduct();
 
-    }
-
-    catch (error) {
+    } catch (error) {
 
         console.error(
-            `TYPE ${type} 로드 실패:`,
+            `TYPE ${type} 키캡 로드 실패:`,
             error
         );
 
     }
 
 }
+
 
 
 // ============================================================
@@ -2424,10 +2377,10 @@ function applyKeycapColorToModel(
 // Slot 선택
 // ============================================================
 
-
 window.selectSlot = function(slot, element) {
-    // 잘못된 슬롯 번호 방지
-    if (!Number.isInteger(slot) || slot < 0 || slot >= 6) {
+
+    // 잘못된 슬롯 번호 방지 (0~6번 슬롯 허용)
+    if (!Number.isInteger(slot) || slot < 0 || slot >= 7) {
         return;
     }
 
@@ -3063,12 +3016,8 @@ function updateCurrentColorUI() {
 }
 
 
-// ============================================================
-// Keycap 색상 변경
-// ============================================================
 
-
- // ============================================================
+// ============================================================
 // Keycap 색상 변경
 // ============================================================
 
@@ -3185,16 +3134,8 @@ function removePartFromSlot(
 
 function removeAllParts() {
 
-    for (
-        let i = 0;
-        i < 6;
-        i++
-    ) {
-
-        removePartFromSlot(
-            i
-        );
-
+    for (let i = 0; i < 7; i++) {
+        removePartFromSlot(i);
     }
 
 }
@@ -3293,9 +3234,11 @@ function removeToppingFromSlot(slot) {
 // ============================================================
 
 function removeAllToppings() {
-    for (let i = 0; i < 6; i++) {
+
+    for (let i = 0; i < 7; i++) {
         removeToppingFromSlot(i);
     }
+
 }
 
 
@@ -3714,7 +3657,7 @@ async function loadPartToAllSlots(
 
     for (
         let i = 0;
-        i < 6;
+        i < 7;
         i++
     ) {
 
@@ -4067,7 +4010,7 @@ function removeSwitches() {
 
     for (
         let i = 0;
-        i < 6;
+        i < 7;
         i++
     ) {
 
@@ -4181,7 +4124,7 @@ async function loadSwitchToAllSlots(
 
     for (
         let i = 0;
-        i < 6;
+        i < 7;
         i++
     ) {
 
@@ -4333,9 +4276,12 @@ window.selectSwitch = async function(switchName, element) {
 function getSelectedAllPart() {
     // 3구: 0, 2, 4번 슬롯
     // 6구: 0, 1, 2, 3, 4, 5번 슬롯
-    const activeSlots = isThreeKeyCase()
+    const activeSlots =
+    selectedBase === 'case_3botton.glb'
         ? [0, 2, 4]
-        : [0, 1, 2, 3, 4, 5];
+        : selectedBase === 'case_4botton.glb'
+            ? [0, 2, 4, 6]
+            : [0, 1, 2, 3, 4, 5];
 
     const firstPart = selectedParts[activeSlots[0]];
 
@@ -4399,9 +4345,12 @@ function updatePrice() {
    
     // 전체 파츠
 
-    const activeSlots = isThreeKeyCase()
+    const activeSlots =
+    selectedBase === 'case_3botton.glb'
         ? [0, 2, 4]
-        : [0, 1, 2, 3, 4, 5];
+        : selectedBase === 'case_4botton.glb'
+            ? [0, 2, 4, 6]
+            : [0, 1, 2, 3, 4, 5];
 
     const selectedAllPart = getSelectedAllPart();
 
