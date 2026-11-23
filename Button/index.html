@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>CLICKER CUSTOM</title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #eeeeee;
+            color: #333333;
+        }
+
+
+        .page {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+
+        .part-thumbnail-canvas {
+        
+            width: 100%;
+            height: 100px;
+            display: block;
+            object-fit: contain;
+            margin: 0 auto 6px;
+        }
+
+        .model-thumbnail {
+            
+            display: block;
+            width: 100%;
+            height: 120px;
+            background: #f8f8f8;
+            border-radius: 10px;
+        }
+
+        
+/* PC 옵션카드 클릭·터치 모션 */
+[data-part],
+[data-base],
+[data-model] {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+[data-part]:active,
+[data-base]:active,
+[data-model]:active {
+    transform: scale(0.95);
+    transition: transform 0.12s ease;
+}
+
+
+/* 모바일 썸네일 터치 모션 */
+@media (hover: none) and (pointer: coarse) {
+    [data-part],
+    [data-base],
+    [data-model] {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    [data-part].touch-pressed,
+    [data-base].touch-pressed,
+    [data-model].touch-pressed {
+        transform: scale(0.95);
+        transition: transform 0.1s ease;
+    }
+}
+
+        
+        
+
+    
+
+
+        /* ====================================================
+           3D
+        ==================================================== */
+
+        .viewer {
+            flex: 1;
+            position: relative;
+            min-width: 0;
+        }
+
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+        }
+
+
+        /* ====================================================
+           PANEL
+        ==================================================== */
+
+        .panel {
+            width: 380px;
+            height: 100%;
+            background: #ffffff;
+            overflow-y: auto;
+            padding: 24px;
+            border-left: 1px solid #dddddd;
+        }
+
+
+        .panel h1 {
+            margin: 0 0 24px;
+            font-size: 22px;
+        }
+
+
+        .section {
+            margin-bottom: 28px;
+        }
+
+
+        .section-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+
+        /* ====================================================
+           OPTION
+        ==================================================== */
+
+        .option-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+
+        .option {
+            border: 1px solid #dddddd;
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+            background: #ffffff;
+            transition: 0.15s;
+        }
+
+
+        .option:hover {
+            border-color: #999999;
+        }
+
+
+        .option.active {
+            border: 2px solid #333333;
+        }
+
+
+        .option-image {
+            width: 100%;
+            height: 80px;
+            background: #f4f4f4;
+            border-radius: 8px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 13px;
+            color: #888888;
+
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+
+
+        .option-name {
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+
+        .option-price {
+            font-size: 13px;
+            color: #777777;
+        }
+
+
+        /* ====================================================
+           SLOT
+        ==================================================== */
+
+        .slot-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(3, auto);
+            gap: 8px;
+        }
+
+
+        .slot {
+            padding: 12px 5px;
+            border: 1px solid #dddddd;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+
+        .slot.active {
+            border: 2px solid #333333;
+            font-weight: bold;
+        }
+
+
+        .selected-slot-info {
+            margin-top: 10px;
+            padding: 10px 12px;
+            background: #f7f7f7;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #666666;
+        }
+
+
+        /* 색상 버튼 내부 텍스트 중앙 정렬 */
+        .color {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .color span {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+
+            margin: 0;
+            padding: 0;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+
+        /* ====================================================
+           COLOR
+        ==================================================== */
+
+        .color-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+
+        .color {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid #dddddd;
+            cursor: pointer;
+        }
+
+
+        .color.active {
+            outline: 2px solid #333333;
+            outline-offset: 2px;
+        }
+
+
+        /* ====================================================
+           ⭐ 축 리스트
+        ==================================================== */
+
+        .switch-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+
+        .switch-item {
+            width: 100%;
+            min-height: 58px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 16px;
+
+            background: #ffffff;
+
+            border: 1px solid #dddddd;
+            border-radius: 10px;
+
+            cursor: pointer;
+
+            transition:
+                border-color 0.15s,
+                background 0.15s;
+        }
+
+
+        .switch-item:hover {
+            border-color: #999999;
+        }
+
+
+        .switch-item.active {
+            border: 2px solid #333333;
+            background: #fafafa;
+        }
+
+
+        .switch-left {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+
+        /* 실제 radio 표시 */
+
+        .switch-radio {
+            width: 18px;
+            height: 18px;
+
+            border: 1.5px solid #999999;
+            border-radius: 50%;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+
+        .switch-item.active
+        .switch-radio {
+            border-color: #333333;
+        }
+
+
+        .switch-item.active
+        .switch-radio::after {
+            content: "";
+
+            width: 9px;
+            height: 9px;
+
+            background: #333333;
+
+            border-radius: 50%;
+        }
+
+
+        .switch-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+
+        .switch-price {
+            font-size: 13px;
+            color: #777777;
+        }
+
+
+        /* ====================================================
+           PRICE
+        ==================================================== */
+
+        .price-box {
+            border-top: 1px solid #eeeeee;
+            padding-top: 18px;
+        }
+
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+
+        .price-total {
+            display: flex;
+            justify-content: space-between;
+
+            margin-top: 14px;
+            padding-top: 14px;
+
+            border-top: 1px solid #eeeeee;
+
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+
+        .buy-button {
+            width: 100%;
+
+            margin-top: 18px;
+            padding: 15px;
+
+            border: none;
+            border-radius: 10px;
+
+            background: #222222;
+            color: #ffffff;
+
+            font-size: 15px;
+
+            cursor: pointer;
+        }
+
+
+        .buy-button:hover {
+            background: #000000;
+        }
+
+
+        /* ====================================================
+           MOBILE
+        ==================================================== */
+
+        
+@media (max-width: 900px) {
+    .page {
+        flex-direction: column;
+        width: 100%;
+        width: 100vw;
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+    }
+
+    .viewer {
+        flex: 0 0 45dvh;
+        width: 100%;
+        height: 45dvh;
+        min-height: 220px;
+    }
+
+    #canvas-container {
+        width: 100%;
+        height: 100%;
+    }
+
+    .panel {
+        position: relative;
+        flex: 1;
+        width: 100%;
+        min-width: 0;
+        min-height: 0;
+        height: auto;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 16px;
+        border-top: 1px solid #dddddd;
+        border-left: none;
+        overscroll-behavior-y: contain;
+    }
+
+    .panel h1 {
+        margin-bottom: 16px;
+        font-size: 20px;
+    }
+
+    /* 큰 옵션 카테고리 가로 탭 */
+    .mobile-option-tabs {
+        position: sticky;
+        top: -16px;
+        z-index: 20;
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 8px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        margin: 0 -16px 18px;
+        padding: 10px 16px;
+        background: #ffffff;
+        border-bottom: 1px solid #eeeeee;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .mobile-option-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .mobile-option-tab {
+        flex: 0 0 auto;
+        padding: 10px 14px;
+        border: 1px solid #dddddd;
+        border-radius: 999px;
+        background: #ffffff;
+        color: #555555;
+        font-size: 13px;
+        white-space: nowrap;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .mobile-option-tab.active {
+        background: #222222;
+        color: #ffffff;
+        border-color: #222222;
+    }
+
+    /* 모바일에서는 선택한 큰 카테고리만 표시 */
+    .panel > .section.mobile-section-hidden {
+        display: none;
+    }
+
+    .panel > .section.mobile-section-active {
+        display: block;
+    }
+
+    /* 세부 옵션은 기존처럼 세로로 배치 */
+    .option-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .slot-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .color-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .switch-list {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .price-box {
+        margin-bottom: 12px;
+    }
+}
+
+/* PC에서는 모바일 탭을 표시하지 않음 */
+@media (min-width: 901px) {
+    .mobile-option-tabs {
+        display: none;
+    }
+}
+
+
+/* 미리보기 영역을 기준으로 색상창 배치 */
+.viewer {
+    position: relative;
+    min-width: 0;
+}
+
+#canvas-container {
+    width: 100%;
+    height: 100%;
+}
+
+#fomora-part-color-panel {
+    display: none;
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    z-index: 100;
+    width: 350px;
+    max-width: calc(100% - 24px);
+    padding: 12px;
+    box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.97);
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+
+@media (max-width: 900px) {
+    #fomora-part-color-panel {
+        position: absolute;
+
+        /* 미리보기 영역 안에서 오른쪽 위에 배치 */
+        top: 8px;
+        right: 8px;
+        bottom: auto;
+        left: auto;
+
+        /* 기존 150px보다 넓게 확보 */
+        width: 130px;
+        max-width: calc(100% - 16px);
+
+        /* 색상창 전체가 화면을 벗어나지 않도록 제한 */
+        max-height: calc(45dvh - 16px);
+        overflow-x: hidden;
+        overflow-y: auto;
+
+        padding: 10px;
+        box-sizing: border-box;
+
+        z-index: 1000;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #fomora-part-color-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+}
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="page">
+
+
+    <!-- ====================================================
+         3D VIEWER
+    ==================================================== -->
+
+    <div class="viewer">
+
+    <div id="canvas-container"></div>
+
+    <!-- 단추 색상 선택창: 미리보기 화면 위에 표시 -->
+    <div id="fomora-part-color-panel">
+        <div style="margin-bottom: 10px; font-weight: 600;">
+            색상 선택
+        </div>
+
+        <div id="fomora-part-color-grid" class="color-grid"></div>
+
+        <button
+    type="button"
+    onclick="window.restoreSelectedPartColor()"
+    style="
+        width: 100%;
+        margin-top: 12px;
+        padding: 9px 10px;
+        border: 1px solid #dddddd;
+        border-radius: 8px;
+        background: #ffffff;
+        cursor: pointer;
+        font-size: 13px;
+    "
+>
+    ↺ 색상복원
+</button>
+    </div>
+
+</div>
+
+
+
+    <!-- ====================================================
+         OPTION PANEL
+    ==================================================== -->
+
+    <div class="panel">
+
+
+        <h1>
+            CLICKER CUSTOM_BUTTON
+        </h1>
+
+
+
+        <!-- ==================================================
+             케이스
+        ================================================== -->
+
+        <div class="section">
+
+            <div class="section-title">
+                케이스
+            </div>
+
+
+            <div class="option-grid">
+
+            
+
+
+                <div 
+                    class="option-card"
+                     data-base="case_3botton.glb"
+                    onclick="selectBase(this)">
+                    <span>3구 케이스</span>
+                    <div class="option-price">
+                        10,000원
+                    </div>
+                </div>
+
+
+                              
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ==================================================
+             키캡 타입
+        ================================================== -->
+
+        <div class="section">
+
+            <div class="section-title">
+                키캡 타입
+            </div>
+
+
+            <div class="option-grid">
+
+              
+                <div 
+                    class="option-card" 
+                    data-type="A"
+                    data-model="TypeA.glb"
+                    onclick="selectType(this)">
+                    <span>TYPE A</span>                   
+                </div>
+
+
+                <div 
+                    class="option-card" 
+                    data-type="B"
+                    data-model="TypeB.glb"
+                    onclick="selectType(this)">
+                    <span>TYPE B</span>                   
+                </div>
+
+
+                               
+
+            </div>
+
+        </div>
+
+
+
+
+
+
+        <!-- ==================================================
+             케이스 색상
+        ================================================== -->
+
+        <div class="section">
+
+            <div class="section-title">
+                케이스 색상
+            </div>
+
+
+            <div class="color-grid">
+
+
+                <div
+                    class="color active"
+                    style="background:#181818"
+                    onclick="changeBaseColor('#181818', this)"
+                ></div>
+
+            
+                <div
+                    class="color"
+                    style="background:#ffffff"
+                    onclick="changeBaseColor('#ffffff', this)"
+                ></div>
+
+
+                <div
+                    class="color"
+                    style="background:#c01d11"
+                    onclick="changeBaseColor('#c01d11', this)"
+                ></div>
+
+
+                <div
+                    class="color"
+                    style="background:#ffcaca"
+                    onclick="changeBaseColor('#ffcaca', this)"
+                ></div>
+
+
+                <div
+                    class="color"
+                    style="background:#84c3db"
+                    onclick="changeBaseColor('#84c3db', this)"
+                ></div>
+
+
+                <div
+                    class="color"
+                    style="background:#7aa380"
+                    onclick="changeBaseColor('#7aa380', this)"
+                ></div>
+
+                
+                <div
+                    class="color"
+                    style="background:#ffeb37"
+                    onclick="changeBaseColor('#ffeb37', this)"
+                ></div>
+
+          
+
+
+            </div>
+
+        </div>
+
+        
+        
+        <!-- ==================================================
+             키캡 색상
+        ================================================== -->
+
+        <div class="section">
+
+            <div class="section-title">
+                키캡 색상
+            </div>
+
+
+            <div class="color-grid">
+
+
+                <div
+                    class="color active"
+                    style="background:#181818"
+                    onclick="changeKeycapColor('#181818', this)"
+                ></div>
+                
+        
+                <div
+                    class="color"
+                    data-keycap-color="#ffffff"
+                    style="background:#ffffff"
+                    onclick="changeKeycapColor('#ffffff', this)"
+                ></div>
+
+
+                <div
+                    class="color"
+                    data-keycap-color="#c01d11"
+                    style="background:#c01d11"
+                    onclick="changeKeycapColor('#c01d11', this)"
+                ></div>
+
+
+                <div
+                    class="color"
+                    data-keycap-color="#ffcaca"
+                    style="background:#ffcaca"
+                    onclick="changeKeycapColor('#ffcaca', this)"
+                ></div>
+
+
+                <div
+                    class="color"
+                    data-keycap-color="#84c3db"
+                    style="background:#84c3db"
+                    onclick="changeKeycapColor('#84c3db', this)"
+                ></div>
+
+
+                <div
+                    class="color"
+                    data-keycap-color="#7aa380"
+                    style="background:#7aa380"
+                    onclick="changeKeycapColor('#7aa380', this)"
+                ></div>
+
+
+
+                <div
+                    class="color"
+                    data-keycap-color="#ffeb37"
+                    style="background:#ffeb37"
+                    onclick="changeKeycapColor('#ffeb37', this)"
+                ></div>
+
+           
+
+            </div>
+
+        </div>
+
+
+        <!-- 전체 키캡 색상 -->
+
+    <div class="section">
+
+        <div class="section-title">
+            전체 키캡 색상
+        </div>
+
+        
+        <div class="color-grid">
+
+                               
+            <div
+                class="color active"
+                style="background:#181818;"
+                onclick="selectAllKeycapColor('#181818', this)"
+            ></div>
+
+            
+            <div
+                class="color"
+                style="background:#FFFFFF;"
+                onclick="selectAllKeycapColor('#FFFFFF', this)"
+            ></div>
+
+
+
+            <div
+                class="color"
+                style="background:#c01d11;"
+                onclick="selectAllKeycapColor('#c01d11', this)"
+            ></div>
+
+
+            <div
+                class="color"
+                style="background:#ffcaca;"
+                onclick="selectAllKeycapColor('#ffcaca', this)"
+            ></div>
+
+
+            <div
+                class="color"
+                style="background:#84c3db;"
+                onclick="selectAllKeycapColor('#84c3db', this)"
+            ></div>
+
+
+            <div
+                class="color"
+                style="background:#7aa380;"
+                onclick="selectAllKeycapColor('#7aa380', this)"
+            ></div>
+
+
+            <div
+                class="color"
+                style="background:#b582b9;"
+                onclick="selectAllKeycapColor('#b582b9', this)"
+            ></div>
+
+
+
+            <div
+                class="color"
+                style="background:#ffeb37;"
+                onclick="selectAllKeycapColor('#ffeb37', this)"
+            ></div>   
+    
+
+        
+    
+    </div>
+</div>
+
+
+
+        <!-- ==================================================
+             파츠
+        ================================================== -->
+        
+
+        <div class="section">
+
+            <div class="section-title">
+                파츠
+            </div>
+
+
+            <div class="option-grid">
+
+
+                <div
+                    class="option"
+                    onclick="selectPart('none')"
+                >
+
+                    <div class="option-image">
+                        NONE
+                    </div>
+
+                    <div class="option-name">
+                        선택 제거
+                    </div>
+
+                    <div class="option-price">
+                        -
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="option"
+                    onclick="selectPart('all-none')"
+                >
+
+                    <div class="option-image">
+                        ALL NONE
+                    </div>
+
+                    <div class="option-name">
+                        전체 제거
+                    </div>
+
+                    <div class="option-price">
+                        -
+                    </div>
+
+                </div>
+
+
+               
+
+
+                <div class="option-card" data-part="Button_thread"
+                     onclick="selectPart('Button_thread')">
+                    <span>단추</span>
+                    <div class="option-price">
+                        +500원
+                    </div>
+                </div>
+
+               
+                <div class="option-card" data-part="Button_star"
+                     onclick="selectPart('Button_star')">
+                    <span>단추_별</span>
+                    <div class="option-price">
+                        +500원
+                    </div>
+                </div>
+
+
+                <div class="option-card" data-part="Button_heart"
+                     onclick="selectPart('Button_heart')">
+                    <span>단추_하트</span>
+                    <div class="option-price">
+                        +500원
+                    </div>
+                </div>
+           
+
+
+
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ==================================================
+             ⭐ 축
+             제일 하단 / 리스트 선택 방식
+        ================================================== -->
+
+        <div class="section">
+
+            <div class="section-title">
+                축
+            </div>
+
+
+            <div class="switch-list">
+
+
+                <!-- 청축 -->
+
+                <div
+                    class="switch-item active"
+                    data-switch="blue"
+                    onclick="selectSwitch('blue', this)"
+                >
+
+                    <div class="switch-left">
+
+                        <div class="switch-radio"></div>
+
+                        <div class="switch-name">
+                            청축
+                        </div>
+
+                    </div>
+
+
+                    <div class="switch-price">
+                        0원
+                    </div>
+
+                </div>
+
+
+
+                <!-- 갈축 -->
+
+                <div
+                    class="switch-item"
+                    data-switch="brown"
+                    onclick="selectSwitch('brown', this)"
+                >
+
+                    <div class="switch-left">
+
+                        <div class="switch-radio"></div>
+
+                        <div class="switch-name">
+                            갈축
+                        </div>
+
+                    </div>
+
+
+                    <div class="switch-price">
+                        0원
+                    </div>
+
+                </div>
+
+
+
+                <!-- 강백축 -->
+
+                <div
+                    class="switch-item"
+                    data-switch="gangbaek"
+                    onclick="selectSwitch('gangbaek', this)"
+                >
+
+                    <div class="switch-left">
+
+                        <div class="switch-radio"></div>
+
+                        <div class="switch-name">
+                            강백축
+                        </div>
+
+                    </div>
+
+
+                    <div class="switch-price">
+                        0원
+                    </div>
+
+                </div>
+
+
+
+                <!-- 바다소금축 -->
+
+                <div
+                    class="switch-item"
+                    data-switch="seasalt"
+                    onclick="selectSwitch('seasalt', this)"
+                >
+
+                    <div class="switch-left">
+
+                        <div class="switch-radio"></div>
+
+                        <div class="switch-name">
+                            바다소금축
+                        </div>
+
+                    </div>
+
+
+                    <div class="switch-price">
+                        0원
+                    </div>
+
+                </div>
+
+
+
+                <!-- 딸기라떼축 -->
+
+                <div
+                    class="switch-item"
+                    data-switch="strawberry_latte"
+                    onclick="selectSwitch('strawberry_latte', this)"
+                >
+
+                    <div class="switch-left">
+
+                        <div class="switch-radio"></div>
+
+                        <div class="switch-name">
+                            딸기라떼축
+                        </div>
+
+                    </div>
+
+
+                    <div class="switch-price">
+                        0원
+                    </div>
+
+                </div>
+
+
+                <!-- 저소음핑크솔트축 -->
+
+                <div
+                    class="switch-item"
+                    data-switch="pinksalt"
+                    onclick="selectSwitch('pinksalt', this)"
+                >
+
+                    <div class="switch-left">
+
+                        <div class="switch-radio"></div>
+
+                        <div class="switch-name">
+                            저소음 핑크솔트축
+                        </div>
+
+                    </div>
+
+
+                    <div class="switch-price">
+                        0원
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ==================================================
+             가격
+        ================================================== -->
+
+        <div class="section price-box">
+
+
+            <div class="price-row">
+
+                <span>
+                    베이스
+                </span>
+
+                <span id="basePrice">
+                    15,900원
+                </span>
+
+            </div>
+
+
+            <div class="price-row">
+
+                <span>
+                    축
+                </span>
+
+                <span id="switchPrice">
+                    0원
+                </span>
+
+            </div>
+
+
+            <div class="price-row">
+
+                <span>
+                    파츠 및 토핑
+                </span>
+
+                <span id="partPrice">
+                    0원
+                </span>
+
+            </div>
+
+
+            <div class="price-total">
+
+                <span>
+                    총 금액
+                </span>
+
+                <span id="totalPrice">
+                    16,900원
+                </span>
+
+            </div>
+
+
+            <button
+                class="buy-button"
+                onclick="buyProduct()"
+            >
+                구매하기
+            </button>
+
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+
+<!-- ====================================================
+     Three.js
+==================================================== -->
+
+<script type="importmap">
+
+{
+    "imports": {
+
+        "three":
+            "https://unpkg.com/three@0.180.0/build/three.module.js",
+
+        "three/addons/":
+            "https://unpkg.com/three@0.180.0/examples/jsm/"
+
+    }
+}
+
+</script>
+
+
+<script
+    type="module"
+    src="./app.js"
+></script>
+
+
+
+
+
+</body>
+
+</html>
